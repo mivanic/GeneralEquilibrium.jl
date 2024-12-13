@@ -39,29 +39,29 @@ function aggregate_data(; data, parameters, mapping)
 
     # Generate the aggregated parameters
     paramAg = Dict(
-        ### "esbv" => GeneralEquilibrium.aggComb(params["esbv"], NamedArray(mapslices(sum, data["evfp"], dims=1)[1, :, :], names(params["esbv"])), [comMap, regMap]),
-        "esbv" => GeneralEquilibrium.aggComb(params["esbv"], NamedArray(repeat(reshape(mapslices(sum, data["evfp"], dims=[1, 3])[1, :, 1], (length(comMap), 1)), inner=[1, length(regMap)]), names(params["esbv"])), [comMap, regMap]),
-        "esbt" => GeneralEquilibrium.aggComb(params["esbt"], NamedArray(
+        ### "esbv" => GeneralEquilibrium.aggComb(parameters["esbv"], NamedArray(mapslices(sum, data["evfp"], dims=1)[1, :, :], names(parameters["esbv"])), [comMap, regMap]),
+        "esbv" => GeneralEquilibrium.aggComb(parameters["esbv"], NamedArray(repeat(reshape(mapslices(sum, data["evfp"], dims=[1, 3])[1, :, 1], (length(comMap), 1)), inner=[1, length(regMap)]), names(parameters["esbv"])), [comMap, regMap]),
+        "esbt" => GeneralEquilibrium.aggComb(parameters["esbt"], NamedArray(
                 mapslices(sum, data["vdfp"], dims=1)[1, :, :]
                 + mapslices(sum, data["vmfp"], dims=1)[1, :, :]
-                + mapslices(sum, data["evfp"], dims=1)[1, :, :], names(params["esbt"])), [comMap, regMap]),
-        "esbc" => GeneralEquilibrium.aggComb(params["esbt"], NamedArray(
-                mapslices(sum, data["vdfp"], dims=1)[1, :, :] + mapslices(sum, data["vmfp"], dims=1)[1, :, :], names(params["esbv"])), [comMap, regMap]),
-        "etrq" => GeneralEquilibrium.aggComb(params["etrq"], NamedArray(
-                mapslices(sum, data["maks"], dims=1)[1, :, :], names(params["etrq"])), [comMap, regMap]),
-        "esbq" => GeneralEquilibrium.aggComb(params["esbq"], NamedArray(
-                mapslices(sum, data["maks"], dims=2)[:, 1, :], names(params["esbq"])), [comMap, regMap]),
-        "esbg" => GeneralEquilibrium.aggComb(params["esbg"], NamedArray(mapslices(sum, data["vdgp"] .+ data["vmgp"], dims=1)[1, :], names(params["esbg"])[1]), [regMap]),
-        #"esbd" => GeneralEquilibrium.aggComb(params["esbd"], NamedArray(mapslices(sum, data["vdfp"] .+ data["vmfp"], dims=2)[:, 1, :], names(params["esbd"])) .+ data["vdpp"].+ data["vmpp"] .+ data["vdgp"].+ data["vmgp"] .+ data["vdip"].+ data["vmip"], [comMap, regMap]),
-        #"esbm" => GeneralEquilibrium.aggComb(params["esbm"], NamedArray(mapslices(sum, data["vmfp"], dims=2)[:, 1, :], names(params["esbm"])) .+ data["vmpp"] .+ data["vmgp"] .+ data["vmip"], [comMap, regMap]),
-        "esbd" => GeneralEquilibrium.aggComb(params["esbd"], NamedArray(repeat(reshape(mapslices(sum, NamedArray(mapslices(sum, data["vdfp"] .+ data["vmfp"], dims=2)[:, 1, :], names(params["esbd"])) .+ data["vdpp"] .+ data["vmpp"] .+ data["vdgp"] .+ data["vmgp"] .+ data["vdip"] .+ data["vmip"], dims=2), (length(comMap), 1)), inner=[1, length(regMap)]), names(params["esbd"])), [comMap, regMap]),
-        "esbm" => GeneralEquilibrium.aggComb(params["esbm"], NamedArray(repeat(reshape(mapslices(sum, NamedArray(mapslices(sum, data["vmfp"], dims=2)[:, 1, :], names(params["esbm"])) .+ data["vmpp"] .+ data["vmgp"] .+ data["vmip"], dims=2), (length(comMap), 1)), inner=[1, length(regMap)]), names(params["esbm"])), [comMap, regMap]),
-        "esbs" => GeneralEquilibrium.aggComb(params["esbs"], NamedArray(mapslices(sum, data["vst"], dims=2)[:, 1], names(params["esbs"])[1]), [marMap]),
-        "subp" => GeneralEquilibrium.aggComb(params["subp"], data["vdpp"] .+ data["vmpp"], [comMap, regMap]),
-        "incp" => GeneralEquilibrium.aggComb(params["incp"], data["vdpp"] .+ data["vmpp"], [comMap, regMap]),
-        "rflx" => params["rflx"],
-        "etre" => GeneralEquilibrium.aggComb(params["etre"], NamedArray(mapslices(sum, data["evos"], dims=2)[:, 1, :], names(params["etre"])), [endMap, regMap]), #params["etre"],
-        "eflg" => GeneralEquilibrium.agg(params["eflg"], [endMap, fixedMap])
+                + mapslices(sum, data["evfp"], dims=1)[1, :, :], names(parameters["esbt"])), [comMap, regMap]),
+        "esbc" => GeneralEquilibrium.aggComb(parameters["esbt"], NamedArray(
+                mapslices(sum, data["vdfp"], dims=1)[1, :, :] + mapslices(sum, data["vmfp"], dims=1)[1, :, :], names(parameters["esbv"])), [comMap, regMap]),
+        "etrq" => GeneralEquilibrium.aggComb(parameters["etrq"], NamedArray(
+                mapslices(sum, data["maks"], dims=1)[1, :, :], names(parameters["etrq"])), [comMap, regMap]),
+        "esbq" => GeneralEquilibrium.aggComb(parameters["esbq"], NamedArray(
+                mapslices(sum, data["maks"], dims=2)[:, 1, :], names(parameters["esbq"])), [comMap, regMap]),
+        "esbg" => GeneralEquilibrium.aggComb(parameters["esbg"], NamedArray(mapslices(sum, data["vdgp"] .+ data["vmgp"], dims=1)[1, :], names(parameters["esbg"])[1]), [regMap]),
+        #"esbd" => GeneralEquilibrium.aggComb(parameters["esbd"], NamedArray(mapslices(sum, data["vdfp"] .+ data["vmfp"], dims=2)[:, 1, :], names(parameters["esbd"])) .+ data["vdpp"].+ data["vmpp"] .+ data["vdgp"].+ data["vmgp"] .+ data["vdip"].+ data["vmip"], [comMap, regMap]),
+        #"esbm" => GeneralEquilibrium.aggComb(parameters["esbm"], NamedArray(mapslices(sum, data["vmfp"], dims=2)[:, 1, :], names(parameters["esbm"])) .+ data["vmpp"] .+ data["vmgp"] .+ data["vmip"], [comMap, regMap]),
+        "esbd" => GeneralEquilibrium.aggComb(parameters["esbd"], NamedArray(repeat(reshape(mapslices(sum, NamedArray(mapslices(sum, data["vdfp"] .+ data["vmfp"], dims=2)[:, 1, :], names(parameters["esbd"])) .+ data["vdpp"] .+ data["vmpp"] .+ data["vdgp"] .+ data["vmgp"] .+ data["vdip"] .+ data["vmip"], dims=2), (length(comMap), 1)), inner=[1, length(regMap)]), names(parameters["esbd"])), [comMap, regMap]),
+        "esbm" => GeneralEquilibrium.aggComb(parameters["esbm"], NamedArray(repeat(reshape(mapslices(sum, NamedArray(mapslices(sum, data["vmfp"], dims=2)[:, 1, :], names(parameters["esbm"])) .+ data["vmpp"] .+ data["vmgp"] .+ data["vmip"], dims=2), (length(comMap), 1)), inner=[1, length(regMap)]), names(parameters["esbm"])), [comMap, regMap]),
+        "esbs" => GeneralEquilibrium.aggComb(parameters["esbs"], NamedArray(mapslices(sum, data["vst"], dims=2)[:, 1], names(parameters["esbs"])[1]), [marMap]),
+        "subp" => GeneralEquilibrium.aggComb(parameters["subp"], data["vdpp"] .+ data["vmpp"], [comMap, regMap]),
+        "incp" => GeneralEquilibrium.aggComb(parameters["incp"], data["vdpp"] .+ data["vmpp"], [comMap, regMap]),
+        "rflx" => parameters["rflx"],
+        "etre" => GeneralEquilibrium.aggComb(parameters["etre"], NamedArray(mapslices(sum, data["evos"], dims=2)[:, 1, :], names(parameters["etre"])), [endMap, regMap]), #parameters["etre"],
+        "eflg" => GeneralEquilibrium.agg(parameters["eflg"], [endMap, fixedMap])
     )
 
     paramAg["eflg"] = paramAg["eflg"] ./ maximum.([paramAg["eflg"][i, :] for i ∈ 1:size(paramAg["eflg"], 1)])
