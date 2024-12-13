@@ -67,6 +67,14 @@ function aggregate_data(; hData, hParameters, mapping)
         paramAg["eflg"] = paramAg["eflg"] ./ maximum.([paramAg["eflg"][i, :] for i ∈ 1:size(paramAg["eflg"], 1)])
         paramAg["eflg"][paramAg["eflg"].<0] .= 0
 
+
+        reg = unique(regMap)
+        comm = unique(comMap)
+        marg = unique(marMap)
+        acts = unique(comMap)
+        endw = unique(endMap)
+
+
         # Return the aggregated hData
-        return (hData=dataAg, hParameters=paramAg)
+        return (hData=dataAg, hParameters=paramAg, sets=Dict("reg" => reg, "comm" => comm, "marg" => marg, "acts" => acts, "endw" => endw))
 end
