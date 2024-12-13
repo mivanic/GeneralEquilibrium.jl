@@ -28,6 +28,8 @@ import ..GeneralEquilibrium, ..FunctionLibrary
 
 module GTAPv7
 
+using NamedArrays, Ipopt, JuMP
+
 import ..ModelLibrary, ..GeneralEquilibrium, ..FunctionLibrary
 
 # The main model function
