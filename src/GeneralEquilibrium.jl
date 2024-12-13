@@ -28,7 +28,7 @@ import ..GeneralEquilibrium, ..FunctionLibrary
 
 module GTAPv7
 
-import ..ModelLibrary, ..GeneralEquilibrium, ..FunctionLibrary
+using ..ModelLibrary, ..GeneralEquilibrium, ..FunctionLibrary
 
 # The main model function
 include("./models/GTAPv7/model.jl")
