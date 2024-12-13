@@ -68,5 +68,5 @@ function aggregate_data(; data, parameters, mapping)
     paramAg["eflg"][paramAg["eflg"].<0] .= 0
 
     # Return the aggregated data
-    return Dict(data => dataAg, parameters => parametersAg)
+    return Dict(data => dataAg, parameters => paramAg)
 end
