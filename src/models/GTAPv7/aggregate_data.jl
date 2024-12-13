@@ -1,7 +1,7 @@
 function aggregate_data(; data, parameters, mapping)
 
     # Read the data, parameters and mapping
-    (; comMap, regMap, marMap, endMap) = NamedTuple(Dict(Symbol(k) => mapping[k] for k in keys(mapping)))
+    (; comMap, regMap, marMap, endMap, fixedMap) = NamedTuple(Dict(Symbol(k) => mapping[k] for k in keys(mapping)))
 
     # Generate the aggregated data
     dataAg =
