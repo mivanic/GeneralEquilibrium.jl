@@ -1,6 +1,6 @@
 function generate_starting_values(; hSets, hData, hParameters)
 
-    include("./helpers/prepare_sets.jl")
+    include("./models/GTAPv7/helpers/prepare_sets.jl")
     (sets) = prepare_sets(hSets=hSets, hParameters = hParameters)
 
     include("./helpers/prepare_parameters.jl")
