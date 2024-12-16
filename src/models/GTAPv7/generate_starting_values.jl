@@ -10,7 +10,7 @@ function generate_starting_values(; hSets, hData, hParameters)
 
     data = prepare_quantities(data=data, parameters=parameters, sets=sets, hData=hData)
 
-    (; parameters, data) = calculate_parameters(data, sets, parameters, hData)
+    (; parameters, data) = prepare_initial_calibrated_parameters(data=data, sets=sets, parameters=parameters, hData=hData)
 
     # Prepare a set of fixed parameters
     fixed = Dict(
