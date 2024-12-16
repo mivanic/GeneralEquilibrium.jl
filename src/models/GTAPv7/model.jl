@@ -1,6 +1,5 @@
 function model(; sets, data, parameters, calibrated_parameters, fixed, hData, calibrate=false)
 
-
     # Structural parameters (some CES/CET options are not happening)
     δ_evfp = hData["evfp"] .> 0
     δ_maks = hData["maks"] .> 0
@@ -8,10 +7,10 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
     δ_vtwr_sum = NamedArray(mapslices(sum, hData["vtwr"], dims=1)[1, :, :, :] .> 0, names(hData["vtwr"])[[2, 3, 4]])
 
     # Read  sets
-    (; reg, comm, marg, acts, endw, endwc, endws, endwms, endwf) = NamedTuple(Dict(Symbol(k)=> sets[k] for k ∈ keys(sets)))
+    (; reg, comm, marg, acts, endw, endwc, endws, endwm, endwms, endwf) = NamedTuple(Dict(Symbol(k)=> sets[k] for k ∈ keys(sets)))
 
     # Read hard parameters
-    (; endowflag, esubt, esubc, esubva, esubd, etraq, esubq, subpar, incpar, etrae, esubg, esubm, esubs) = NamedTuple(parameters)
+    (; endowflag, esubt, esubc, esubva, esubd, etraq, esubq, subpar, incpar, etrae, esubg, esubm, esubs) = NamedTuple(Dict(Symbol(k)=> parameters[k] for k ∈ keys(parameters)))
 
     # Set up the model
     model = JuMP.Model(Ipopt.Optimizer)
@@ -238,6 +237,8 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
             e_qca[a=acts, r=reg], log.(Vector(qca[:, a, r])[δ_maks[:, a, r]]) .== log.(Vector(demand_ces(qo[a, r], Vector(ps[:, a, r])[δ_maks[:, a, r]], Vector(α_qca[:, a, r])[δ_maks[:, a, r]], etraq[a, r], γ_qca[a, r])))
             e_po[a=acts, r=reg], log.(po[a, r] * qo[a, r]) == log.(sum(qca[:, a, r] .* ps[:, a, r]))
             e_pca[c=comm, r=reg], log.(Vector(qca[c, :, r])[δ_maks[c, :, r]]) .== log.(Vector(demand_ces(qc[c, r], Vector(pca[c, :, r])[δ_maks[c, :, r]], Vector(α_pca[c, :, r])[δ_maks[c, :, r]], esubq[c, r], γ_pca[c, r])))
+            #e_pca[c=comm, r=reg], log.(pca[c,:,r]) .== log(pds[c,r]) 
+            #e_pca[c=comm, r=reg], (esubq[c,r] == Inf ? log(pca[c,:,r]) == log(pds[c,r]) : log.(Vector(qca[c, :, r])[δ_maks[c, :, r]]) .== log.(Vector(demand_ces(qc[c, r], Vector(pca[c, :, r])[δ_maks[c, :, r]], Vector(α_pca[c, :, r])[δ_maks[c, :, r]], esubq[c, r], γ_pca[c, r]))))
             e_qc[c=comm, r=reg], log.(pds[c, r] * qc[c, r]) == log.(sum(pca[c, :, r] .* qca[c, :, r]))
             e_ps, log.(pca) .== log.(ps .* to)
 
@@ -435,13 +436,13 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
     # Set starting values
     for k in keys(data)
         #if eval(Meta.parse("@isdefined $(String(k))"))
-        if k ∈ names(Main)
+        #if k ∈ names(Main)
             if data[k] isa NamedArray
-                set_start_value.(getfield(Main, k), Array(data[k]))
+                set_start_value.(model[Symbol(k)], Array(data[k]))
             else
-                set_start_value.(getfield(Main, k), data[k])
+                set_start_value.(model[Symbol(k)], data[k])
             end
-        end
+        #end
         #end
     end
 
@@ -449,14 +450,14 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
     for fv ∈ keys(fixed)
         for fvi ∈ CartesianIndices(fixed[fv])
             if fixed[fv][fvi]
-                fix(getfield(Main, fv)[fvi], data[fv][fvi]; force=true)
+                fix(model[Symbol(fv)][fvi], data[fv][fvi]; force=true)
             end
         end
     end
 
     # Fix soft parameters
     for sp ∈ keys(calibrated_parameters)
-        fix.(getfield(Main, sp), Array(calibrated_parameters[sp]); force=true)
+        fix.(model[Symbol(sp)], Array(calibrated_parameters[sp]); force=true)
     end
 
 
@@ -465,10 +466,13 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
     free_variables = filter((x) -> is_fixed.(x) == false, all_variables(model))
 
 
+    unfix(ppa["crops","oceania"])
+    fix(ppa["svces","eu"], data["ppa"]["svces","eu"]; force = true)
+
+    set_attribute(model, "max_iter", 20)
+
     # Solve
     optimize!(model)
-
-
 
     return (sets=sets, data=data, parameters=parameters, calibrated_parameters)
 end
