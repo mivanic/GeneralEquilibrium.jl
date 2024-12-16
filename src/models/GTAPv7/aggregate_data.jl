@@ -76,5 +76,5 @@ function aggregate_data(; hData, hParameters, mapping)
 
 
         # Return the aggregated hData
-        return (hData=dataAg, hParameters=paramAg, sets=Dict("reg" => reg, "comm" => comm, "marg" => marg, "acts" => acts, "endw" => endw))
+        return (hData=dataAg, hParameters=paramAg, hSets=Dict("reg" => reg, "comm" => comm, "marg" => marg, "acts" => acts, "endw" => endw))
 end

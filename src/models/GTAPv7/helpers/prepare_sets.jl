@@ -1,4 +1,4 @@
-function prepare_sets(; hSets)
+function prepare_sets(; hSets, hParameters)
     # generate all sets
     (; marg, comm, reg, endw, acts) = NamedTuple(Dict(Symbol(k) => hSets[k] for k ∈ keys(hSets)))
 

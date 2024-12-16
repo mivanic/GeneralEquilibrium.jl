@@ -1,7 +1,7 @@
 function generate_starting_values(; hSets, hData, hParameters)
 
     include("./helpers/prepare_sets.jl")
-    (sets) = prepare_sets(hSets=hSets)
+    (sets) = prepare_sets(hSets=hSets, hParameters = hParameters)
 
     include("./helpers/prepare_parameters.jl")
     (parameters) = prepare_parameters(hSets=hParameters)
