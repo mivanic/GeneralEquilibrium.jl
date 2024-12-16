@@ -29,7 +29,8 @@ import ..GeneralEquilibrium, ..FunctionLibrary
 module GTAPv7
 
 using NamedArrays, Ipopt, JuMP
-import ..ModelLibrary, ..GeneralEquilibrium, ..FunctionLibrary
+import ..ModelLibrary, ..GeneralEquilibrium
+import ..FunctionLibrary: cde
 
 include("./models/GTAPv7/helpers/prepare_sets.jl")
 include("./models/GTAPv7/helpers/prepare_parameters.jl")
