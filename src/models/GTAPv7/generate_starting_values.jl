@@ -13,6 +13,7 @@ function generate_starting_values(; hSets, hData, hParameters)
     (; parameters, data) = prepare_initial_calibrated_parameters(data=data, sets=sets, parameters=parameters, hData=hData)
 
     # Prepare a set of fixed parameters
+    (; comm, reg) = NamedTuple(Dict(Symbol(k) => sets[k] for k ∈ ["comm", "reg"]))
     fixed = Dict(
         k => NamedArray(trues(size(data[k])), names(data[k])) for (k) in ["to", "tfe", "tx", "txs", "tm", "tms", "tfd", "tfm", "tpd", "tpm", "tgd", "tgm", "tid", "tim", "tinc", "qesf", "qe", "ppa"]
     )
