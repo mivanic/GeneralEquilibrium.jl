@@ -1,21 +1,15 @@
 function generate_starting_values(; hSets, hData, hParameters)
 
-    include("./models/GTAPv7/helpers/prepare_sets.jl")
-    (sets) = prepare_sets(hSets=hSets, hParameters = hParameters)
+    (sets) = prepare_sets(hSets=hSets, hParameters=hParameters)
 
-    include("./helpers/prepare_parameters.jl")
-    (parameters) = prepare_parameters(hSets=hParameters)
+    (parameters) = prepare_parameters(hParameters=hParameters)
 
-    include("./helpers/prepare_initial_values.jl")
     data = prepare_initial_values(sets=sets, hData=hData, hParameters=hParameters)
 
-    include("./helpers/prepare_taxes.jl")
-    data = prepare_taxes(data, hData)
+    data = prepare_taxes(data=data, hData=hData)
 
-    include("./helpers/prepare_quantities.jl")
     data = prepare_quantities(data=data, parameters=parameters, sets=sets, hData=hData)
 
-    include("./helpers/prepare_parameters.jl")
     (; parameters, data) = calculate_parameters(data, sets, parameters, hData)
 
     # Prepare a set of fixed parameters

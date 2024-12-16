@@ -28,6 +28,14 @@ import ..GeneralEquilibrium, ..FunctionLibrary
 
 module GTAPv7
 
+include("./models/GTAPv7/helpers/prepare_sets.jl")
+include("./models/GTAPv7/helpers/prepare_parameters.jl")
+include("./models/GTAPv7/helpers/prepare_initial_values.jl")
+include("./models/GTAPv7/helpers/prepare_taxes.jl")
+include("./models/GTAPv7/helpers/prepare_quantities.jl")
+include("./models/GTAPv7/helpers/prepare_parameters.jl")
+
+
 using NamedArrays, Ipopt, JuMP
 
 import ..ModelLibrary, ..GeneralEquilibrium, ..FunctionLibrary
