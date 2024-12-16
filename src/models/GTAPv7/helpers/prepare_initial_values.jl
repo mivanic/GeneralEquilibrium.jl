@@ -1,5 +1,5 @@
 # This calculates some initial values 
-function calculate_initial_values(; sets, hData, hParameters)
+function prepare_initial_values(; sets, hData, hParameters)
     # Read the sets
     (; marg, comm, reg, endw, acts, endwm, endwms, endwf) = NamedTuple(Dict(Symbol(k) => sets[k] for k ∈ keys(sets)))
 

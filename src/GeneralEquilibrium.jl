@@ -33,7 +33,7 @@ include("./models/GTAPv7/helpers/prepare_parameters.jl")
 include("./models/GTAPv7/helpers/prepare_initial_values.jl")
 include("./models/GTAPv7/helpers/prepare_taxes.jl")
 include("./models/GTAPv7/helpers/prepare_quantities.jl")
-include("./models/GTAPv7/helpers/prepare_parameters.jl")
+include("./models/GTAPv7/helpers/prepare_initial_calibrated_parameters.jl")
 
 
 using NamedArrays, Ipopt, JuMP
