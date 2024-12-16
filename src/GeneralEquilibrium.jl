@@ -30,7 +30,7 @@ module GTAPv7
 
 using NamedArrays, Ipopt, JuMP
 import ..ModelLibrary, ..GeneralEquilibrium
-import ..FunctionLibrary: cde
+import ..FunctionLibrary: cde, demand_ces
 
 include("./models/GTAPv7/helpers/prepare_sets.jl")
 include("./models/GTAPv7/helpers/prepare_parameters.jl")
