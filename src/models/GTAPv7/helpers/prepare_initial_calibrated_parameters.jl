@@ -4,7 +4,7 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
     (; esubt, esubc, esubva, esubd, etraq, esubq, subpar, incpar, esubg, etrae, esubm, esubs, endowflag) = NamedTuple(Dict(Symbol(k) => parameters[k] for k ∈ keys(parameters)))
 
     # Read sets
-    (; comm, reg, marg, endws, endwm, endwms) = NamedTuple(Dict(Symbol(k) => sets[k] for k ∈ keys(sets)))
+    (; comm, reg, marg, endws, endwc, endwm, endwms) = NamedTuple(Dict(Symbol(k) => sets[k] for k ∈ keys(sets)))
 
 
     # Read all data
