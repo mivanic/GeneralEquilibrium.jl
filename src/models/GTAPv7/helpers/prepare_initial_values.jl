@@ -3,10 +3,33 @@ function prepare_initial_values(; sets, hData, hParameters)
     # Read the sets
     (; marg, comm, reg, endw, acts, endwm, endwms, endwf) = NamedTuple(Dict(Symbol(k) => sets[k] for k ∈ keys(sets)))
 
-    fincome = NamedArray(mapslices(sum, hData["evfb"], dims=[1, 2])[1, 1, :], names(hData["evfb"])[[3]][1])
-    y = fincome
-    yp = NamedArray(mapslices(sum, hData["vdpb"] .+ hData["vmpb"], dims=[1])[1, :], names(hData["vdpb"])[[2]][1])
-    yg = NamedArray(mapslices(sum, hData["vdgb"] .+ hData["vmgb"], dims=[1])[1, :], names(hData["vdgb"])[[2]][1])
+    fincome = NamedArray(mapslices(sum, hData["evfb"], dims=[1, 2])[1, 1, :], names(hData["evfb"])[[3]][1]) .- hData["vdep"]
+    DPTAX = hData["vdpp"]  .- hData["vdpb"]
+    MPTAX = hData["vmpp"]  .- hData["vmpb"]
+    DGTAX = hData["vdgp"]  .- hData["vdgb"]
+    MGTAX = hData["vmgp"]  .- hData["vmgb"]
+    DITAX = hData["vdip"]  .- hData["vdib"]
+    MITAX = hData["vmip"]  .- hData["vmib"]
+    MFTAX = hData["vmfp"] .- hData["vmfb"]
+    DFTAX = hData["vdfp"] .- hData["vdfb"]
+    ETAX = hData["evfp"] .- hData["evfb"]
+    PTAX = hData["makb"] .- hData["maks"]
+    XTAXD = hData["vfob"] .- hData["vxsb"]
+    MTAX = hData["vmsb"] .- hData["vcif"]
+    
+    TAXRIMP = mapslices(sum, MTAX, dims = [1,2])[1,1,:]
+    TAXREXP = mapslices(sum, XTAXD, dims = [1,3])[1,:,1]
+    TAXROUT = mapslices(sum, PTAX, dims = [1,2])[1,1,:]
+    TAXRFU = mapslices(sum, ETAX, dims = [1,2])[1,1,:]
+    TAXRIU = mapslices(sum, DFTAX .+ MFTAX, dims = [1,2])[1,1,:]
+    TAXRIC = mapslices(sum, DITAX .+ MITAX, dims = 1)[1,:]
+    TAXRGC = mapslices(sum, DGTAX .+ MGTAX, dims = 1)[1,:]
+    TAXRPC = mapslices(sum, DPTAX .+ MPTAX, dims = 1)[1,:]
+    INDTAX = TAXRPC .+ TAXRGC .+ TAXRIC .+ TAXRIU .+ TAXRFU .+ TAXROUT .+ TAXREXP .+ TAXRIMP
+    y = fincome .+ INDTAX
+    
+    yp = NamedArray(mapslices(sum, hData["vdpp"] .+ hData["vmpp"], dims=[1])[1, :], names(hData["vdpp"])[[2]][1])
+    yg = NamedArray(mapslices(sum, hData["vdgp"] .+ hData["vmgp"], dims=[1])[1, :], names(hData["vdgp"])[[2]][1])
     walras_sup = sum(hData["vdib"]) + sum(hData["vmib"])
     walras_dem = walras_sup
 

@@ -1,7 +1,7 @@
 function prepare_quantities(; data, parameters, sets, hData)
 
     # Read all prices
-    (; pint, pva, po, pfa, pfe, pfm, ps, pds, ppm, pes, pgm, pim, pcgdswld, psave, pmds, pt, pinv, walras_sup, ppa, ppd, pgd, pga, peb, tpd, pms, tpm, tgd, tgm, tid, tim, tfd, tfm, to, pfd, tfe, pfob, txs, pcif, tms) = NamedTuple(Dict(Symbol(k) => data[k] for k ∈ keys(data)))
+    (; pint, pva, po, pfa, pfe, pfm, ps, pds, ppm, pes, pgm, pim, pcgdswld, psave, pmds, pt, pinv, walras_sup, ppa, ppd, pgd, pga, peb, tpd, pms, tpm, tgd, tgm, tid, tim, tfd, tfm, to, pfd, tfe, pfob, txs, pcif, tms, fincome, y, yg, yp) = NamedTuple(Dict(Symbol(k) => data[k] for k ∈ keys(data)))
 
 
     # Read all sets
@@ -93,17 +93,17 @@ function prepare_quantities(; data, parameters, sets, hData)
 
 
     # Calculate values
-    yp = NamedArray(mapslices(sum, qpa .* ppa, dims=1)[1, :],reg)
-    yg = NamedArray(mapslices(sum, qga .* pga, dims=1)[1, :],reg)
-    fincome = NamedArray(mapslices(sum, peb .* qes, dims=[1, 2])[1, 1, :], reg)
+    #yp = NamedArray(mapslices(sum, qpa .* ppa, dims=1)[1, :],reg)
+    #yg = NamedArray(mapslices(sum, qga .* pga, dims=1)[1, :],reg)
+    #fincome = NamedArray(mapslices(sum, peb .* qes, dims=[1, 2])[1, 1, :], reg)
     walras_sup = pcgdswld * globalcgds
     walras_dem = pcgdswld * globalcgds
 
-    y = fincome .+ mapslices(sum, qpd .* pds .* (tpd .- 1) .+ qpm .* pms .* (tpm .- 1) .+ qgd .* pds .* (tgd .- 1) .+ qgm .* pms .* (tgm .- 1) .+ qid .* pds .* (tid .- 1) .+ qim .* pms .* (tim .- 1), dims=1)[1, :] .+
-        mapslices(sum, qfd .* pfd ./ tfd .* (tfd .- 1) .+ qfm .* pfm ./ tfm .* (tfm .- 1) .+ qca .* ps .* (to .- 1), dims=[1, 2])[1, 1, :] .+
-        mapslices(sum, qfe .* peb .* (tfe .- 1), dims=[1, 2])[1, 1, :] .+
-        mapslices(sum, qxs .* pfob ./ txs .* (txs .- 1), dims=[1, 3])[1, :, 1] .+
-        mapslices(sum, qxs .* pcif .* (tms .- 1), dims=[1, 2])[1, 1, :]
+    # y = fincome .+ mapslices(sum, qpd .* pds .* (tpd .- 1) .+ qpm .* pms .* (tpm .- 1) .+ qgd .* pds .* (tgd .- 1) .+ qgm .* pms .* (tgm .- 1) .+ qid .* pds .* (tid .- 1) .+ qim .* pms .* (tim .- 1), dims=1)[1, :] .+
+    #     mapslices(sum, qfd .* pfd ./ tfd .* (tfd .- 1) .+ qfm .* pfm ./ tfm .* (tfm .- 1) .+ qca .* ps .* (to .- 1), dims=[1, 2])[1, 1, :] .+
+    #     mapslices(sum, qfe .* peb .* (tfe .- 1), dims=[1, 2])[1, 1, :] .+
+    #     mapslices(sum, qxs .* pfob ./ txs .* (txs .- 1), dims=[1, 3])[1, :, 1] .+
+    #     mapslices(sum, qxs .* pcif .* (tms .- 1), dims=[1, 2])[1, 1, :]
 
 
     kb = hData["vkb"] ./ pinv
