@@ -1,4 +1,4 @@
-# GeneralEquilibrium
+# GeneralEquilibrium.jl
 
 [![Build Status](https://github.com/mivanic/GeneralEquilibrium.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/mivanic/GeneralEquilibrium.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 
@@ -96,7 +96,7 @@ calibrated_calibrated_parameters = copy(calibrated_parameters)
 ```
 
 
-# Running baseline secenario (the world before the shock)
+# Running baseline scenario (the world before the shock)
 
 ```
 (; data, calibrated_parameters) = GTAPv7.model(sets=sets, data=calibrated_data, parameters=parameters, calibrated_parameters=calibrated_calibrated_parameters, fixed=fixed, hData=hData, calibrate=false, max_iter = 20)
