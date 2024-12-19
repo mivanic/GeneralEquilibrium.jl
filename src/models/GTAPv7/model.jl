@@ -453,12 +453,12 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
 
     # Fix soft parameters
     for sp ∈ keys(calibrated_parameters)
-        fix.(Array(model[Symbol(sp)])[.!isnan.(soft_parameters[sp])], Array(calibrated_parameters[sp])[.!isnan.(soft_parameters[sp])]; force=true)
+        fix.(Array(model[Symbol(sp)])[.!isnan.(calibrated_parameters[sp])], Array(calibrated_parameters[sp])[.!isnan.(calibrated_parameters[sp])]; force=true)
     end
 
     # Delete any soft parameters not needed (e.g., associated with esubq, which may be 0)
-    for sp ∈ keys(soft_parameters)
-        delete.(model, Array(model[Symbol(sp)])[isnan.(soft_parameters[sp])])
+    for sp ∈ keys(calibrated_parameters)
+        delete.(model, Array(model[Symbol(sp)])[isnan.(calibrated_parameters[sp])])
     end
 
 
@@ -519,12 +519,12 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
         unfix.(Array(α_qtmfsd)[δ_vtwr])
         fix.(Array(vtwr)[δ_vtwr], hData["vtwr"][δ_vtwr]; force=true)
 
-        for k in keys(soft_parameters)
+        for k in keys(calibrated_parameters)
             if Symbol(k) ∈ keys(object_dictionary(model))
-                if soft_parameters[k] isa NamedArray
-                    set_start_value.(Array(model[Symbol(k)])[.!isnan.(soft_parameters[k])], Array(soft_parameters[k])[.!isnan.(soft_parameters[k])])
+                if calibrated_parameters[k] isa NamedArray
+                    set_start_value.(Array(model[Symbol(k)])[.!isnan.(calibrated_parameters[k])], Array(calibrated_parameters[k])[.!isnan.(calibrated_parameters[k])])
                 else
-                    set_start_value.(Array(model[Symbol(k)])[.!isnan.(soft_parameters[k])], soft_parameters[k][.!isnan.(soft_parameters[k])])
+                    set_start_value.(Array(model[Symbol(k)])[.!isnan.(calibrated_parameters[k])], calibrated_parameters[k][.!isnan.(calibrated_parameters[k])])
                 end
             end
         end
