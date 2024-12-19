@@ -1,7 +1,6 @@
-function aggregate_data(; hData, hParameters, mapping)
+function aggregate_data(; hData, hParameters, hSets, comMap, regMap, endMap)
 
-        # Read the hData, hParameters and mapping
-        (; comMap, regMap, marMap, endMap) = NamedTuple(Dict(Symbol(k) => mapping[k] for k in keys(mapping)))
+        marMap = comMap[map(f -> in(f, hSets["marg"]), names(comMap)[1])]
 
         # Fixed map
         fixedMap = NamedArray(["mobile", "sluggish", "fixed"],["mobile", "sluggish", "fixed"])
