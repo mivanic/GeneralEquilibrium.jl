@@ -152,47 +152,47 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
 
 
             # Soft parameters
-            0 <= α_qintva[["int", "va"], acts, reg] <= 1
-            0 <= γ_qintva[acts, reg]
-            0 <= α_qfa[comm, acts, reg] <= 1
-            0 <= γ_qfa[acts, reg]
-            0 <= α_qfe[endw, acts, reg] <= 1
-            0 <= γ_qfe[acts, reg]
+            1e-8 <= α_qintva[["int", "va"], acts, reg] <= 1
+            1e-8 <= γ_qintva[acts, reg]
+            1e-8 <= α_qfa[comm, acts, reg] <= 1
+            1e-8 <= γ_qfa[acts, reg]
+            1e-8 <= α_qfe[endw, acts, reg] <= 1
+            1e-8 <= γ_qfe[acts, reg]
             0 <= ϵ_qfe[acts, reg]
-            0 <= α_qfdqfm[["dom", "imp"], comm, acts, reg] <= 1
-            0 <= γ_qfdqfm[comm, acts, reg]
+            1e-8 <= α_qfdqfm[["dom", "imp"], comm, acts, reg] <= 1
+            1e-8 <= γ_qfdqfm[comm, acts, reg]
             0 <= ϵ_qfdqfm[comm, acts, reg]
-            0 <= α_qca[comm, acts, reg] <= 1
-            0 <= γ_qca[acts, reg]
-            0 <= α_pca[comm, acts, reg] <= 1
-            0 <= γ_pca[acts, reg]
-            0 <= σyp[reg] <= 1
-            0 <= σyg[reg] <= 1
-            0 <= σsave[reg] <= 1
-            0 <= α_qga[comm, reg] <= 1
-            0 <= γ_qga[reg]
-            0 <= α_qia[comm, reg] <= 1
-            0 <= γ_qia[reg]
-            0 <= α_qpdqpm[["dom", "imp"], acts, reg] <= 1
-            0 <= γ_qpdqpm[acts, reg]
+            1e-8 <= α_qca[comm, acts, reg] <= 1
+            1e-8 <= γ_qca[acts, reg]
+            1e-8 <= α_pca[comm, acts, reg] <= 1
+            1e-8 <= γ_pca[acts, reg]
+            1e-8 <= σyp[reg] <= 1
+            1e-8 <= σyg[reg] <= 1
+            1e-8 <= σsave[reg] <= 1
+            1e-8 <= α_qga[comm, reg] <= 1
+            1e-8 <= γ_qga[reg]
+            1e-8 <= α_qia[comm, reg] <= 1
+            1e-8 <= γ_qia[reg]
+            1e-8 <= α_qpdqpm[["dom", "imp"], acts, reg] <= 1
+            1e-8 <= γ_qpdqpm[acts, reg]
             0 <= ϵ_qpdqpm[acts, reg]
-            0 <= α_qgdqgm[["dom", "imp"], acts, reg] <= 1
-            0 <= γ_qgdqgm[acts, reg]
+            1e-8 <= α_qgdqgm[["dom", "imp"], acts, reg] <= 1
+            1e-8 <= γ_qgdqgm[acts, reg]
             0 <= ϵ_qgdqgm[acts, reg]
             1e-8 <= β_qpa[comm, reg]
-            0 <= α_qidqim[["dom", "imp"], acts, reg] <= 1
-            0 <= γ_qidqim[acts, reg]
+            1e-8 <= α_qidqim[["dom", "imp"], acts, reg] <= 1
+            1e-8 <= γ_qidqim[acts, reg]
             0 <= ϵ_qidqim[acts, reg]
-            0 <= α_qxs[comm, reg, reg] <= 1
-            0 <= γ_qxs[comm, reg]
+            1e-8 <= α_qxs[comm, reg, reg] <= 1
+            1e-8 <= γ_qxs[comm, reg]
             0 <= ϵ_qxs[comm, reg]
-            0 <= α_qtmfsd[marg, comm, reg, reg] <= 1
-            0 <= α_qst[marg, reg] <= 1
-            0 <= γ_qst[marg]
-            0 <= α_qes2[endws, acts, reg] <= 1
-            0 <= γ_qes2[endws, reg]
-            0 <= ϵ_qes2[endws, reg]
-            0 <= α_qinv[reg] <= 1
+            1e-8 <= α_qtmfsd[marg, comm, reg, reg] <= 1
+            1e-8 <= α_qst[marg, reg] <= 1
+            1e-8 <= γ_qst[marg]
+            1e-8 <= α_qes2[endws, acts, reg] <= 1
+            1e-8 <= γ_qes2[endws, reg]
+            1e-8 <= ϵ_qes2[endws, reg]
+            1e-8 <= α_qinv[reg] <= 1
 
             0 <= δ[reg] <= 1
             0 <= ρ[reg] <= 1
