@@ -527,7 +527,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
                 if soft_parameters[k] isa NamedArray
                     set_start_value.(Array(model[Symbol(k)])[.!isnan.(soft_parameters[k])], Array(soft_parameters[k])[.!isnan.(soft_parameters[k])])
                 else
-                    set_start_value.(Array(model[Symbol(k))[.!isnan.(soft_parameters[k])], soft_parameters[k][.!isnan.(soft_parameters[k])])
+                    set_start_value.(Array(model[Symbol(k)])[.!isnan.(soft_parameters[k])], soft_parameters[k][.!isnan.(soft_parameters[k])])
                 end
             end
         end
