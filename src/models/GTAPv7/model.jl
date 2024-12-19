@@ -555,7 +555,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
         data=merge(data, Dict(k => results[k] for k ∈ keys(results) ∩ keys(data))),
         parameters=parameters,
         calibrated_parameters=merge(calibrated_parameters, Dict(k => results[k] for k ∈ keys(results) ∩ keys(calibrated_parameters))),
-        constraints=contraints,
+        constraints=constraints,
         free_variables=free_variables)
 
 end
