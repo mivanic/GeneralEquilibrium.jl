@@ -44,7 +44,7 @@ sets = HeaderArrayFile.readHar("./gsdfset.har")
 # Aggregate the data
 
 ## Prepare the mapping vectors
-## You can start by 
+## You can start by reading the regions, commodities and endowments from the disaggregated data and modifying them
 regMap = NamedArray(sets["reg"], sets["reg"])
 regMap[1:3] .= "oceania"
 regMap[4:27] .= "asia"
@@ -70,17 +70,7 @@ endMap[[2,5]] .= "sklabor"
 endMap[[3,4,6]] .= "unsklabor"
 endMap["capital"] = "capital"
 
-
-marMap = comMap[map(f -> in(f, sets["marg"]), names(comMap)[1])]
-
-#fixedMap = NamedArray(copy(names(parameters["eflg"])[2]), copy(names(parameters["eflg"])[2]))
-
-## Do the aggregation
-using Pkg
-Pkg.add(url="https://github.com/mivanic/GeneralEquilibrium.jl")
 using GeneralEquilibrium
 (; hData, hParameters, hSets) = GeneralEquilibrium.ModelLibrary.GTAPv7.aggregate_data(hData=data, hParameters=parameters, mapping=Dict("comMap" => comMap, "regMap" => regMap, "marMap" => marMap, "endMap" => endMap))
-
-
 ```
 

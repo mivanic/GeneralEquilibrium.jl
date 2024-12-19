@@ -5,7 +5,7 @@ function prepare_parameters(; hParameters)
     esubva = hParameters["esbv"]
     esubd = hParameters["esbd"]
     etraq = hParameters["etrq"]
-    esubq = 1 ./ hParameters["esbq"]
+    esubq = hParameters["esbq"]
     subpar = hParameters["subp"]
     incpar = hParameters["incp"]
     esubg = hParameters["esbg"]

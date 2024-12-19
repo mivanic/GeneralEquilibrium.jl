@@ -1,4 +1,4 @@
-function model(; sets, data, parameters, calibrated_parameters, fixed, hData, calibrate=false)
+function model(; sets, data, parameters, calibrated_parameters, fixed, hData, calibrate=false, max_iter=50)
 
     # Structural parameters (some CES/CET options are not happening)
     δ_evfp = hData["evfp"] .> 0
@@ -7,10 +7,10 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
     δ_vtwr_sum = NamedArray(mapslices(sum, hData["vtwr"], dims=1)[1, :, :, :] .> 0, names(hData["vtwr"])[[2, 3, 4]])
 
     # Read  sets
-    (; reg, comm, marg, acts, endw, endwc, endws, endwm, endwms, endwf) = NamedTuple(Dict(Symbol(k)=> sets[k] for k ∈ keys(sets)))
+    (; reg, comm, marg, acts, endw, endwc, endws, endwm, endwms, endwf) = NamedTuple(Dict(Symbol(k) => sets[k] for k ∈ keys(sets)))
 
     # Read hard parameters
-    (; endowflag, esubt, esubc, esubva, esubd, etraq, esubq, subpar, incpar, etrae, esubg, esubm, esubs) = NamedTuple(Dict(Symbol(k)=> parameters[k] for k ∈ keys(parameters)))
+    (; endowflag, esubt, esubc, esubva, esubd, etraq, esubq, subpar, incpar, etrae, esubg, esubm, esubs) = NamedTuple(Dict(Symbol(k) => parameters[k] for k ∈ keys(parameters)))
 
     # Set up the model
     model = JuMP.Model(Ipopt.Optimizer)
@@ -236,9 +236,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
             # Firms (distribution)
             e_qca[a=acts, r=reg], log.(Vector(qca[:, a, r])[δ_maks[:, a, r]]) .== log.(Vector(demand_ces(qo[a, r], Vector(ps[:, a, r])[δ_maks[:, a, r]], Vector(α_qca[:, a, r])[δ_maks[:, a, r]], etraq[a, r], γ_qca[a, r])))
             e_po[a=acts, r=reg], log.(po[a, r] * qo[a, r]) == log.(sum(qca[:, a, r] .* ps[:, a, r]))
-            e_pca[c=comm, r=reg], log.(Vector(qca[c, :, r])[δ_maks[c, :, r]]) .== log.(Vector(demand_ces(qc[c, r], Vector(pca[c, :, r])[δ_maks[c, :, r]], Vector(α_pca[c, :, r])[δ_maks[c, :, r]], esubq[c, r], γ_pca[c, r])))
-            #e_pca[c=comm, r=reg], log.(pca[c,:,r]) .== log(pds[c,r]) 
-            #e_pca[c=comm, r=reg], (esubq[c,r] == Inf ? log(pca[c,:,r]) == log(pds[c,r]) : log.(Vector(qca[c, :, r])[δ_maks[c, :, r]]) .== log.(Vector(demand_ces(qc[c, r], Vector(pca[c, :, r])[δ_maks[c, :, r]], Vector(α_pca[c, :, r])[δ_maks[c, :, r]], esubq[c, r], γ_pca[c, r]))))
+            e_pca[c=comm, r=reg], log.((esubq[c, r] == 0 ? Vector(pca[c, :, r])[δ_maks[c, :, r]] : Vector(qca[c, :, r])[δ_maks[c, :, r]])) .== log.((esubq[c, r] == 0 ? pds[c, r] : Vector(demand_ces(qc[c, r], Vector(pca[c, :, r])[δ_maks[c, :, r]], Vector(α_pca[c, :, r])[δ_maks[c, :, r]], 1 / esubq[c, r], γ_pca[c, r]))))
             e_qc[c=comm, r=reg], log.(pds[c, r] * qc[c, r]) == log.(sum(pca[c, :, r] .* qca[c, :, r]))
             e_ps, log.(pca) .== log.(ps .* to)
 
@@ -435,15 +433,13 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
 
     # Set starting values
     for k in keys(data)
-        #if eval(Meta.parse("@isdefined $(String(k))"))
-        #if k ∈ names(Main)
+        if Symbol(k) ∈ object_dictionary(model)
             if data[k] isa NamedArray
                 set_start_value.(model[Symbol(k)], Array(data[k]))
             else
                 set_start_value.(model[Symbol(k)], data[k])
             end
-        #end
-        #end
+        end
     end
 
     # Fix fixed values
@@ -457,7 +453,12 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
 
     # Fix soft parameters
     for sp ∈ keys(calibrated_parameters)
-        fix.(model[Symbol(sp)], Array(calibrated_parameters[sp]); force=true)
+        fix.(Array(model[Symbol(sp)])[.!isnan.(soft_parameters[sp])], Array(calibrated_parameters[sp])[.!isnan.(soft_parameters[sp])]; force=true)
+    end
+
+    # Delete any soft parameters not needed (e.g., associated with esubq, which may be 0)
+    for sp ∈ keys(soft_parameters)
+        delete.(model, Array(model[Symbol(sp)])[isnan.(soft_parameters[sp])])
     end
 
 
@@ -465,14 +466,87 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
     constraints = all_constraints(model; include_variable_in_set_constraints=false)
     free_variables = filter((x) -> is_fixed.(x) == false, all_variables(model))
 
+    set_attribute(model, "max_iter", max_iter)
 
-    unfix(ppa["crops","oceania"])
-    fix(ppa["svces","eu"], data["ppa"]["svces","eu"]; force = true)
+    # If we calibrate, we do things little bit differently; we fix values and allow parameters to adjust
+    if calibrate
+        # CAL-I
+        unfix.(α_qxs)
+        unfix.(γ_qxs)
+        fix.(Array(vcif), hData["vcif"]; force=true)
+        fix.(ϵ_qxs, 1; force=true)
 
-    set_attribute(model, "max_iter", 20)
+        # CAL-II
+        unfix.(Array(α_qfe)[δ_evfp])
+        unfix.(γ_qfe)
+        fix.(Array(evfp)[δ_evfp], hData["evfp"][δ_evfp]; force=true)
+        fix.(ϵ_qfe, 1; force=true)
+
+        # CAL-IIb
+        unfix.(Array(α_qes2)[δ_evfp[endws, :, :]])
+        unfix.(γ_qes2)
+        fix.(Array(evos[endws, :, :])[δ_evfp[endws, :, :]], hData["evos"][endws, :, :][δ_evfp[endws, :, :]]; force=true)
+        fix.(ϵ_qes2, 1; force=true)
+
+
+        # CAL-III
+        unfix.(α_qfdqfm)
+        unfix.(γ_qfdqfm)
+        fix.(Array(vdfp), hData["vdfp"]; force=true)
+        fix.(Array(vmfp), hData["vmfp"]; force=true)
+        fix.(ϵ_qfdqfm, 1; force=true)
+
+        # CAL-IV
+        unfix.(α_qpdqpm)
+        unfix.(γ_qpdqpm)
+        fix.(Array(vdpp), hData["vdpp"]; force=true)
+        fix.(Array(vmpp), hData["vmpp"]; force=true)
+        fix.(ϵ_qpdqpm, 1; force=true)
+
+
+        # CAL-V
+        unfix.(α_qgdqgm)
+        unfix.(γ_qgdqgm)
+        fix.(Array(vdgp), hData["vdgp"]; force=true)
+        fix.(Array(vmgp), hData["vmgp"]; force=true)
+        fix.(ϵ_qgdqgm, 1; force=true)
+
+        # CAL-VI
+        unfix.(α_qidqim)
+        unfix.(γ_qidqim)
+        fix.(Array(vdip), hData["vdip"]; force=true)
+        fix.(Array(vmip), hData["vmip"]; force=true)
+        fix.(ϵ_qidqim, 1; force=true)
+
+        # CAL-VII
+        unfix.(Array(α_qtmfsd)[δ_vtwr])
+        fix.(Array(vtwr)[δ_vtwr], hData["vtwr"][δ_vtwr]; force=true)
+
+        for k in keys(soft_parameters)
+            if Symbol(k) ∈ object_dictionary(model)
+                if soft_parameters[k] isa NamedArray
+                    set_start_value.(Array(model[Symbol(k)])[.!isnan.(soft_parameters[k])], Array(soft_parameters[k])[.!isnan.(soft_parameters[k])])
+                else
+                    set_start_value.(Array(model[Symbol(k))[.!isnan.(soft_parameters[k])], soft_parameters[k][.!isnan.(soft_parameters[k])])
+                end
+            end
+        end
+        
+    end
 
     # Solve
     optimize!(model)
 
-    return (sets=sets, data=data, parameters=parameters, calibrated_parameters)
+    # Save results
+    results = merge(Dict(
+            String(k) => NamedArray(value.(v).data, value.(v).axes) for (k, v) in object_dictionary(model)
+            if v isa AbstractArray{VariableRef}
+        ), Dict(
+            String(k) => value.(v) for (k, v) in object_dictionary(model)
+            if v isa VariableRef
+        ))
+
+
+    return (sets=sets, data=merge(data, results), parameters=parameters, calibrated_parameters)
+
 end

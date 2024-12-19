@@ -101,7 +101,7 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
 
     prices = pca
     quantities = qca
-    sigma = esubq
+    sigma = 1 ./ esubq
     sigma_expanded = permutedims(repeat(sigma, inner=[1, 1, size(quantities, 1)]), [3, 1, 2])
     output = qc
 
