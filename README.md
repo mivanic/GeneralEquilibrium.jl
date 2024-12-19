@@ -30,6 +30,8 @@ To run the GTAPv7 model, you need to follow the following steps:
     - `regMap`: a Named Vector which maps original regions to the new ones
     - `endMap`: a Named Vector which maps original endowments to the new ones
         
+## Aggregating the data
+
 ```
 # Use packages HeaderArrayFile and NamedArrays to process the initial data
 using HeaderArrayFile, NamedArrays
@@ -68,7 +70,62 @@ endMap[[2,5]] .= "sklabor"
 endMap[[3,4,6]] .= "unsklabor"
 endMap["capital"] = "capital"
 
-using GeneralEquilibrium
-(; hData, hParameters, hSets) = GeneralEquilibrium.ModelLibrary.GTAPv7.aggregate_data(hData=data, hParameters=parameters, hSets = sets, comMap = comMap, regMap = regMap, endMap = endMap)
+using GeneralEquilibrium.ModelLibrary.GTAPv7
+
+# Do the aggregation
+(; hData, hParameters, hSets) = GTAPv7.aggregate_data(hData=data, hParameters=parameters, hSets=sets, comMap=comMap, regMap=regMap, endMap=endMap)
+
 ```
+
+# Generating starting values
+
+```
+# Starting data and parameters
+(; sets, parameters, data, calibrated_parameters, fixed) = GTAPv7.generate_starting_values(hSets=hSets, hData=hData, hParameters=hParameters)
+start_data = copy(data)
+start_calibrated_parameters = copy(calibrated_parameters)
+```
+
+# Calibrate the data and parameters
+
+```
+(; data, calibrated_parameters) = GTAPv7.model(sets=sets, data=start_data, parameters=parameters, calibrated_parameters=start_calibrated_parameters, fixed=fixed, hData=hData, calibrate=true, max_iter=200)
+
+calibrated_data = copy(data)
+calibrated_calibrated_parameters = copy(calibrated_parameters)
+```
+
+
+# Running baseline secenario (the world before the shock)
+
+```
+(; data, calibrated_parameters) = GTAPv7.model(sets=sets, data=calibrated_data, parameters=parameters, calibrated_parameters=calibrated_calibrated_parameters, fixed=fixed, hData=hData, calibrate=false, max_iter = 20)
+
+# Let's save the state of the world before the simulation
+data0 = copy(data)
+```
+
+# Running the scenario (the world after the shock)
+
+```
+# Set the tariff on crops from ssafrica to eu to 1.2 (20 percent)
+data["tms"]["crops", "ssafrica", "eu"] = 1.2
+
+# Run the model
+(; data, calibrated_parameters) = GTAPv7.model(sets=sets, data=data, parameters=parameters, calibrated_parameters=calibrated_calibrated_parameters, fixed=fixed, hData=hData, calibrate=false, max_iter=20)
+
+# Save the world after the simulation
+data1 = copy(data)
+```
+
+# Analyzing the results
+
+```
+# Show the change in exports (percent)
+((data1["qxs"]./data0["qxs"])[:, :, "eu"] .- 1) .* 100
+
+```
+
+
+
 
