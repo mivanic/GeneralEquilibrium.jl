@@ -191,6 +191,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
             0 <= γ_qst[marg]
             0 <= α_qes2[endws, acts, reg] <= 1
             0 <= γ_qes2[endws, reg]
+            0 <= ϵ_qes2[endws, reg]
             0 <= α_qinv[reg] <= 1
 
             0 <= δ[reg] <= 1
@@ -364,6 +365,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
             # Soft parameter constraints
             sf_α_qxs[c=comm, d=reg], log(sum(α_qxs[c, :, d])) == log(ϵ_qxs[c, d])
             sf_α_qfe[a=acts, r=reg], log(sum(α_qfe[:, a, r])) == log(ϵ_qfe[a, r])
+            sf_α_qes2[e = endws, r = reg], log(sum(α_qes2[e,:,r])) == log(ϵ_qes2[e,r])
             sf_α_qfdqfm[c=comm, a=acts, r=reg], log(sum(α_qfdqfm[:, c, a, r])) == log(ϵ_qfdqfm[c, a, r])
             sf_α_qpdqpm[c=comm, r=reg], log(sum(α_qpdqpm[:, c, r])) == log(ϵ_qpdqpm[c, r])
             sf_α_qgdqgm[c=comm, r=reg], log(sum(α_qgdqgm[:, c, r])) == log(ϵ_qgdqgm[c, r])
