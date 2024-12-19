@@ -462,9 +462,6 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
     end
 
 
-    # # Summary of constraints and free variables
-    constraints = all_constraints(model; include_variable_in_set_constraints=false)
-    free_variables = filter((x) -> is_fixed.(x) == false, all_variables(model))
 
     set_attribute(model, "max_iter", max_iter)
 
@@ -531,8 +528,11 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
                 end
             end
         end
-        
+
     end
+    # # Summary of constraints and free variables
+    constraints = all_constraints(model; include_variable_in_set_constraints=false)
+    free_variables = filter((x) -> is_fixed.(x) == false, all_variables(model))
 
     # Solve
     optimize!(model)
@@ -547,6 +547,12 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
         ))
 
 
-    return (sets=sets, data=merge(data, results), parameters=parameters, calibrated_parameters)
+    return (
+        sets=sets,
+        data=merge(data, Dict(k => results[k] for k ∈ keys(results) ∩ keys(data))),
+        parameters=parameters,
+        calibrated_parameters=merge(calibrated_parameters, Dict(k => results[k] for k ∈ keys(results) ∩ keys(calibrated_parameters))),
+        constraints=contraints,
+        free_variables=free_variables)
 
 end
