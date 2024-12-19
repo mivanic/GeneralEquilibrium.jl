@@ -542,11 +542,11 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
 
     # Save results
     results = merge(Dict(
-            String(k) => NamedArray(value.(v).data, value.(v).axes) for (k, v) in object_dictionary(model)
+            String(k) => NamedArray(value.(v[is_valid.(model, v)]).data, value.(v).axes) for (k, v) in object_dictionary(model)
             if v isa AbstractArray{VariableRef}
         ), Dict(
             String(k) => value.(v) for (k, v) in object_dictionary(model)
-            if v isa VariableRef
+            if v isa VariableRef && is_valid(model, v)
         ))
 
 
