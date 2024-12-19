@@ -433,7 +433,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
 
     # Set starting values
     for k in keys(data)
-        if Symbol(k) ∈ object_dictionary(model)
+        if Symbol(k) ∈ keys(object_dictionary(model))
             if data[k] isa NamedArray
                 set_start_value.(model[Symbol(k)], Array(data[k]))
             else
@@ -523,7 +523,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
         fix.(Array(vtwr)[δ_vtwr], hData["vtwr"][δ_vtwr]; force=true)
 
         for k in keys(soft_parameters)
-            if Symbol(k) ∈ object_dictionary(model)
+            if Symbol(k) ∈ keys(object_dictionary(model))
                 if soft_parameters[k] isa NamedArray
                     set_start_value.(Array(model[Symbol(k)])[.!isnan.(soft_parameters[k])], Array(soft_parameters[k])[.!isnan.(soft_parameters[k])])
                 else
