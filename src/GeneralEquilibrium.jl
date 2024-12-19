@@ -2,18 +2,10 @@ module GeneralEquilibrium
 
 using JuMP, NamedArrays
 
-export agg, aggComb
+export agg, aggComb, cde
 
 include("agg.jl")
 include("aggComb.jl")
-
-function solve(; model, sets, data, parameters, calibrated_parameters)
-    return model(; sets=sets, data=data, parameters=parameters, calibrated_parameters, calibrate=false)
-end
-
-function calibrate(; model, sets, data, parameters, calibrated_parameters)
-    return model(; sets=sets, data=data, parameters=parameters, calibrated_parameters, calibrate=true)
-end
 
 module FunctionLibrary
 

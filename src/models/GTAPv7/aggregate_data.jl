@@ -1,7 +1,10 @@
 function aggregate_data(; hData, hParameters, mapping)
 
         # Read the hData, hParameters and mapping
-        (; comMap, regMap, marMap, endMap, fixedMap) = NamedTuple(Dict(Symbol(k) => mapping[k] for k in keys(mapping)))
+        (; comMap, regMap, marMap, endMap) = NamedTuple(Dict(Symbol(k) => mapping[k] for k in keys(mapping)))
+
+        # Fixed map
+        fixedMap = ["mobile", "sluggish", "fixed"]
 
         # Generate the aggregated hData
         dataAg =
