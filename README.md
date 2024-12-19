@@ -23,15 +23,13 @@ To run the GTAPv7 model, you need to follow the following steps:
     - To turn a Fortran-style HAR file into a Julia dictionary, you may use package [HeaderArrayFile](https://github.com/mivanic/HeaderArrayFile.jl)
     - You may either aggregate your data outside module `GTAPv7`, e.g., by using GTAPAgg or FlexAgg programs also distributed by the GTAP Center, or you can use function `aggregate_data` in model `GTAPv7` as explained below
 
-- To aggregate GTAP data in module `GTAPv7`, you can run function `aggregate_data(; hData, hParameters, mapping)` with the following arguments:
+- To aggregate GTAP data in module `GTAPv7`, you can run function `aggregate_data(; hData, hParameters, hSets, comMap, regMap, endMap)` with the following arguments:
     - `hData`: a Dict object with the keys appropriate for the GTAPv7 model data (e.g., "vfob", "evos", etc.)
     - `hParameters`: a Dict object with the keys appropriate for the GTAPv7 model parameters (e.g., "esbq", etc.)
-    - `mapping`: a Dict object with four keys:
-        - `comMap`: a Named Vector which maps original commodities to the new ones 
-        - `regMap`: a Named Vector which maps original regions to the new ones
-        - `endMap`: a Named Vector which maps original endowments to the new ones
-        - `marMap`: a Named Vector which maps original margin commodities to the new ones
-
+    - `comMap`: a Named Vector which maps original commodities to the new ones 
+    - `regMap`: a Named Vector which maps original regions to the new ones
+    - `endMap`: a Named Vector which maps original endowments to the new ones
+        
 ```
 # Use packages HeaderArrayFile and NamedArrays to process the initial data
 using HeaderArrayFile, NamedArrays
@@ -71,6 +69,6 @@ endMap[[3,4,6]] .= "unsklabor"
 endMap["capital"] = "capital"
 
 using GeneralEquilibrium
-(; hData, hParameters, hSets) = GeneralEquilibrium.ModelLibrary.GTAPv7.aggregate_data(hData=data, hParameters=parameters, mapping=Dict("comMap" => comMap, "regMap" => regMap, "marMap" => marMap, "endMap" => endMap))
+(; hData, hParameters, hSets) = GeneralEquilibrium.ModelLibrary.GTAPv7.aggregate_data(hData=data, hParameters=parameters, hSets = sets, comMap = comMap, regMap = regMap, endMap = endMap)
 ```
 
