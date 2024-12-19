@@ -194,6 +194,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
             0 <= α_qinv[reg] <= 1
 
             0 <= δ[reg] <= 1
+            0 <= ρ[reg] <= 1
 
             # Values
             0 <= vdfp[comm, acts, reg]
@@ -339,7 +340,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
             e_walras_dem, log(walras_dem) == log(sum(psave .* qsave))
 
             # Capital accumulation
-            e_kb[r=reg], log(kb[r]) == log(sum(qe[endwc, r]))
+            e_kb[r = reg], log(ρ[r] * pinv[r] * kb[r]) == log(sum(qe[endwc,r] .* pe[endwc,r]))
             e_ke, log.(ke) .== log.(qinv .+ (1 .- δ .* kb))
 
             # Values
