@@ -472,33 +472,48 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
     if calibrate
         # CAL-I
         unfix.(α_qxs)
+        set_lower_bound.(α_qxs, 1e-8)
+        set_upper_bound.(α_qxs, 1)
         unfix.(γ_qxs)
+        set_lower_bound.(γ_qxs, 1e-8)
         fix.(Array(vcif), hData["vcif"]; force=true)
         fix.(ϵ_qxs, 1; force=true)
 
         # CAL-II
         unfix.(Array(α_qfe)[δ_evfp])
+        set_lower_bound.(Array(α_qfe)[δ_evfp], 1e-8)
+        set_upper_bound.(Array(α_qfe)[δ_evfp], 1)
         unfix.(γ_qfe)
+        set_lower_bound.(γ_qfe, 1e-8)
         fix.(Array(evfp)[δ_evfp], hData["evfp"][δ_evfp]; force=true)
         fix.(ϵ_qfe, 1; force=true)
 
         # CAL-IIb
         unfix.(Array(α_qes2)[δ_evfp[endws, :, :]])
+        set_lower_bound.(Array(α_qes2)[δ_evfp[endws, :, :]], 1e-8)
+        set_upper_bound.(Array(α_qes2)[δ_evfp[endws, :, :]], 1)
         unfix.(γ_qes2)
+        set_lower_bound.(γ_qes2, 1e-8)
         fix.(Array(evos[endws, :, :])[δ_evfp[endws, :, :]], hData["evos"][endws, :, :][δ_evfp[endws, :, :]]; force=true)
         fix.(ϵ_qes2, 1; force=true)
 
 
         # CAL-III
         unfix.(α_qfdqfm)
+        set_lower_bound.(α_qfdqfm, 1e-8)
+        set_upper_bound.(α_qfdqfm, 1)
         unfix.(γ_qfdqfm)
+        set_lower_bound.(γ_qfdqfm, 1e-8)
         fix.(Array(vdfp), hData["vdfp"]; force=true)
         fix.(Array(vmfp), hData["vmfp"]; force=true)
         fix.(ϵ_qfdqfm, 1; force=true)
 
         # CAL-IV
         unfix.(α_qpdqpm)
+        set_lower_bound.(α_qpdqpm, 1e-8)
+        set_upper_bound.(α_qpdqpm, 1)
         unfix.(γ_qpdqpm)
+        set_lower_bound.(γ_qpdqpm, 1e-8)
         fix.(Array(vdpp), hData["vdpp"]; force=true)
         fix.(Array(vmpp), hData["vmpp"]; force=true)
         fix.(ϵ_qpdqpm, 1; force=true)
@@ -506,20 +521,27 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
 
         # CAL-V
         unfix.(α_qgdqgm)
+        set_lower_bound.(α_qgdqgm, 1e-8)
+        set_upper_bound.(α_qgdqgm, 1)
         unfix.(γ_qgdqgm)
+        set_lower_bound.(γ_qgdqgm, 1e-8)
         fix.(Array(vdgp), hData["vdgp"]; force=true)
         fix.(Array(vmgp), hData["vmgp"]; force=true)
         fix.(ϵ_qgdqgm, 1; force=true)
 
         # CAL-VI
         unfix.(α_qidqim)
+        set_lower_bound.(α_qidqim, 1e-8)
+        set_upper_bound.(α_qidqim, 1)
         unfix.(γ_qidqim)
+        set_lower_bound.(γ_qidqim, 1e-8)
         fix.(Array(vdip), hData["vdip"]; force=true)
         fix.(Array(vmip), hData["vmip"]; force=true)
         fix.(ϵ_qidqim, 1; force=true)
 
         # CAL-VII
         unfix.(Array(α_qtmfsd)[δ_vtwr])
+        set_lower_bound.(Array(α_qtmfsd)[δ_vtwr], 0)
         fix.(Array(vtwr)[δ_vtwr], hData["vtwr"][δ_vtwr]; force=true)
 
         for k in keys(calibrated_parameters)
@@ -543,16 +565,16 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
     # Save results
     results = merge(Dict(
             String(k) => begin
-                arrayOut = NamedArray(zeros(map(length, v.axes)), v.axes )
-                arrayOut[is_valid.(model,v).data] .= value.(Array(v)[is_valid.(model,v).data])
-                arrayOut[.! is_valid.(model,v).data] .= NaN
+                arrayOut = NamedArray(zeros(map(length, v.axes)), v.axes)
+                arrayOut[is_valid.(model, v).data] .= value.(Array(v)[is_valid.(model, v).data])
+                arrayOut[.!is_valid.(model, v).data] .= NaN
                 arrayOut
                 #NamedArray(value.(v[is_valid.(model, v)]).data, value.(v).axes)
             end for (k, v) in object_dictionary(model)
             if v isa AbstractArray{VariableRef}
         ), Dict(
             String(k) => begin
-            (is_valid(model,v) ? value.(v) : NaN)
+                (is_valid(model, v) ? value.(v) : NaN)
             end for (k, v) in object_dictionary(model)
             if v isa VariableRef
         ))
