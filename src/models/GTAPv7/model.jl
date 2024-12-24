@@ -456,14 +456,14 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
 
     # Fix soft parameters
     for sp ∈ keys(parameters)
-        if sp ∈ keys(object_dictionary(model))
+        if Symbol(sp) ∈ keys(object_dictionary(model))
             fix.(Array(model[Symbol(sp)])[.!isnan.(parameters[sp])], Array(parameters[sp])[.!isnan.(parameters[sp])]; force=true)
         end
     end
 
     # Delete any soft parameters not needed (e.g., associated with esubq, which may be 0)
     for sp ∈ keys(parameters)
-        if sp ∈ keys(object_dictionary(model))
+        if Symbol(sp) ∈ keys(object_dictionary(model))
             delete.(model, Array(model[Symbol(sp)])[isnan.(parameters[sp])])
         end
     end
