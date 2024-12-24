@@ -149,7 +149,20 @@ function prepare_quantities(; data, parameters, sets, hData)
         :walras_sup => walras_sup,
         :walras_dem => walras_dem,
         :kb => kb,
-        :ke => ke
+        :ke => ke,
+        :evfp => hData["evfp"],
+        :maks => hData["maks"],
+        :vtwr => hData["vtwr"],
+        :vtwr => hData["vcif"],
+        :evos => hData["evos"],
+        :vdfp => hData["vdfp"],
+        :vmfp => hData["vmfp"],
+        :vdpp => hData["vdpp"],
+        :vmpp => hData["vmpp"],
+        :vdgp => hData["vdgp"],
+        :vmgp => hData["vmgp"],
+        :vdip => hData["vdip"],
+        :vmip => hData["vmip"]
     )
 
     return merge(data, Dict(String(k)=>quantities[k] for k ∈ keys(quantities)))

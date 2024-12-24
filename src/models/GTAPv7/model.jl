@@ -1,10 +1,10 @@
-function model(; sets, data, parameters, calibrated_parameters, fixed, hData, calibrate=false, max_iter=50)
+function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
 
     # Structural parameters (some CES/CET options are not happening)
-    δ_evfp = hData["evfp"] .> 0
-    δ_maks = hData["maks"] .> 0
-    δ_vtwr = hData["vtwr"] .> 0
-    δ_vtwr_sum = NamedArray(mapslices(sum, hData["vtwr"], dims=1)[1, :, :, :] .> 0, names(hData["vtwr"])[[2, 3, 4]])
+    δ_evfp = data["evfp"] .> 0
+    δ_maks = data["maks"] .> 0
+    δ_vtwr = data["vtwr"] .> 0
+    δ_vtwr_sum = NamedArray(mapslices(sum, data["vtwr"], dims=1)[1, :, :, :] .> 0, names(data["vtwr"])[[2, 3, 4]])
 
     # Read  sets
     (; reg, comm, marg, acts, endw, endwc, endws, endwm, endwms, endwf) = NamedTuple(Dict(Symbol(k) => sets[k] for k ∈ keys(sets)))
@@ -476,7 +476,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
         set_upper_bound.(α_qxs, 1)
         unfix.(γ_qxs)
         set_lower_bound.(γ_qxs, 1e-8)
-        fix.(Array(vcif), hData["vcif"]; force=true)
+        fix.(Array(vcif), data["vcif"]; force=true)
         fix.(ϵ_qxs, 1; force=true)
 
         # CAL-II
@@ -485,7 +485,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
         set_upper_bound.(Array(α_qfe)[δ_evfp], 1)
         unfix.(γ_qfe)
         set_lower_bound.(γ_qfe, 1e-8)
-        fix.(Array(evfp)[δ_evfp], hData["evfp"][δ_evfp]; force=true)
+        fix.(Array(evfp)[δ_evfp], data["evfp"][δ_evfp]; force=true)
         fix.(ϵ_qfe, 1; force=true)
 
         # CAL-IIb
@@ -494,7 +494,7 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
         set_upper_bound.(Array(α_qes2)[δ_evfp[endws, :, :]], 1)
         unfix.(γ_qes2)
         set_lower_bound.(γ_qes2, 1e-8)
-        fix.(Array(evos[endws, :, :])[δ_evfp[endws, :, :]], hData["evos"][endws, :, :][δ_evfp[endws, :, :]]; force=true)
+        fix.(Array(evos[endws, :, :])[δ_evfp[endws, :, :]], data["evos"][endws, :, :][δ_evfp[endws, :, :]]; force=true)
         fix.(ϵ_qes2, 1; force=true)
 
 
@@ -504,8 +504,8 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
         set_upper_bound.(α_qfdqfm, 1)
         unfix.(γ_qfdqfm)
         set_lower_bound.(γ_qfdqfm, 1e-8)
-        fix.(Array(vdfp), hData["vdfp"]; force=true)
-        fix.(Array(vmfp), hData["vmfp"]; force=true)
+        fix.(Array(vdfp), data["vdfp"]; force=true)
+        fix.(Array(vmfp), data["vmfp"]; force=true)
         fix.(ϵ_qfdqfm, 1; force=true)
 
         # CAL-IV
@@ -514,8 +514,8 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
         set_upper_bound.(α_qpdqpm, 1)
         unfix.(γ_qpdqpm)
         set_lower_bound.(γ_qpdqpm, 1e-8)
-        fix.(Array(vdpp), hData["vdpp"]; force=true)
-        fix.(Array(vmpp), hData["vmpp"]; force=true)
+        fix.(Array(vdpp), data["vdpp"]; force=true)
+        fix.(Array(vmpp), data["vmpp"]; force=true)
         fix.(ϵ_qpdqpm, 1; force=true)
 
 
@@ -525,8 +525,8 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
         set_upper_bound.(α_qgdqgm, 1)
         unfix.(γ_qgdqgm)
         set_lower_bound.(γ_qgdqgm, 1e-8)
-        fix.(Array(vdgp), hData["vdgp"]; force=true)
-        fix.(Array(vmgp), hData["vmgp"]; force=true)
+        fix.(Array(vdgp), data["vdgp"]; force=true)
+        fix.(Array(vmgp), data["vmgp"]; force=true)
         fix.(ϵ_qgdqgm, 1; force=true)
 
         # CAL-VI
@@ -535,14 +535,14 @@ function model(; sets, data, parameters, calibrated_parameters, fixed, hData, ca
         set_upper_bound.(α_qidqim, 1)
         unfix.(γ_qidqim)
         set_lower_bound.(γ_qidqim, 1e-8)
-        fix.(Array(vdip), hData["vdip"]; force=true)
-        fix.(Array(vmip), hData["vmip"]; force=true)
+        fix.(Array(vdip), data["vdip"]; force=true)
+        fix.(Array(vmip), data["vmip"]; force=true)
         fix.(ϵ_qidqim, 1; force=true)
 
         # CAL-VII
         unfix.(Array(α_qtmfsd)[δ_vtwr])
         set_lower_bound.(Array(α_qtmfsd)[δ_vtwr], 0)
-        fix.(Array(vtwr)[δ_vtwr], hData["vtwr"][δ_vtwr]; force=true)
+        fix.(Array(vtwr)[δ_vtwr], data["vtwr"][δ_vtwr]; force=true)
 
         for k in keys(calibrated_parameters)
             if Symbol(k) ∈ keys(object_dictionary(model))

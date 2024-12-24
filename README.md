@@ -81,7 +81,7 @@ using GeneralEquilibrium.ModelLibrary.GTAPv7
 
 ```
 # Starting data and parameters
-(; sets, parameters, data, calibrated_parameters, fixed) = GTAPv7.generate_starting_values(hSets=hSets, hData=hData, hParameters=hParameters)
+(; sets, parameters, data, fixed) = GTAPv7.generate_starting_values(hSets=hSets, hData=hData, hParameters=hParameters)
 start_data = copy(data)
 start_calibrated_parameters = copy(calibrated_parameters)
 ```
@@ -89,17 +89,17 @@ start_calibrated_parameters = copy(calibrated_parameters)
 # Calibrate the data and parameters
 
 ```
-(; data, calibrated_parameters) = GTAPv7.model(sets=sets, data=start_data, parameters=parameters, calibrated_parameters=start_calibrated_parameters, fixed=fixed, hData=hData, calibrate=true, max_iter=200)
+(; data, parameters) = GTAPv7.model(sets=sets, data=start_data, parameters=parameters, calibrated_parameters=start_calibrated_parameters, fixed=fixed, hData=hData, calibrate=true, max_iter=200)
 
 calibrated_data = copy(data)
-calibrated_calibrated_parameters = copy(calibrated_parameters)
+calibrated_parameters = copy(parameters)
 ```
 
 
 # Running baseline scenario (the world before the shock)
 
 ```
-(; data, calibrated_parameters) = GTAPv7.model(sets=sets, data=calibrated_data, parameters=parameters, calibrated_parameters=calibrated_calibrated_parameters, fixed=fixed, hData=hData, calibrate=false, max_iter = 20)
+(; data, parameters) = GTAPv7.model(sets=sets, data=calibrated_data, parameters=parameters,  fixed=fixed, calibrate=false, max_iter = 20)
 
 # Let's save the state of the world before the simulation
 data0 = copy(data)
