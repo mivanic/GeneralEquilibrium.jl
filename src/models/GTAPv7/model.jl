@@ -455,13 +455,17 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
     end
 
     # Fix soft parameters
-    for sp ∈ keys(calibrated_parameters)
-        fix.(Array(model[Symbol(sp)])[.!isnan.(calibrated_parameters[sp])], Array(calibrated_parameters[sp])[.!isnan.(calibrated_parameters[sp])]; force=true)
+    for sp ∈ keys(parameters)
+        if sp ∈ object_dictionary(model)
+            fix.(Array(model[Symbol(sp)])[.!isnan.(parameters[sp])], Array(parameters[sp])[.!isnan.(parameters[sp])]; force=true)
+        end
     end
 
     # Delete any soft parameters not needed (e.g., associated with esubq, which may be 0)
-    for sp ∈ keys(calibrated_parameters)
-        delete.(model, Array(model[Symbol(sp)])[isnan.(calibrated_parameters[sp])])
+    for sp ∈ keys(parameters)
+        if sp ∈ object_dictionary(model)
+            delete.(model, Array(model[Symbol(sp)])[isnan.(parameters[sp])])
+        end
     end
 
 
@@ -544,12 +548,12 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
         set_lower_bound.(Array(α_qtmfsd)[δ_vtwr], 0)
         fix.(Array(vtwr)[δ_vtwr], data["vtwr"][δ_vtwr]; force=true)
 
-        for k in keys(calibrated_parameters)
+        for k in keys(parameters)
             if Symbol(k) ∈ keys(object_dictionary(model))
-                if calibrated_parameters[k] isa NamedArray
-                    set_start_value.(Array(model[Symbol(k)])[.!isnan.(calibrated_parameters[k])], Array(calibrated_parameters[k])[.!isnan.(calibrated_parameters[k])])
+                if parameters[k] isa NamedArray
+                    set_start_value.(Array(model[Symbol(k)])[.!isnan.(parameters[k])], Array(parameters[k])[.!isnan.(parameters[k])])
                 else
-                    set_start_value.(Array(model[Symbol(k)])[.!isnan.(calibrated_parameters[k])], calibrated_parameters[k][.!isnan.(calibrated_parameters[k])])
+                    set_start_value.(Array(model[Symbol(k)])[.!isnan.(parameters[k])], parameters[k][.!isnan.(parameters[k])])
                 end
             end
         end
@@ -582,9 +586,8 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
 
     return (
         sets=sets,
-        data=merge(data, Dict(k => results[k] for k ∈ setdiff(keys(results), keys(calibrated_parameters)))),
-        parameters=parameters,
-        calibrated_parameters=merge(calibrated_parameters, Dict(k => results[k] for k ∈ keys(results) ∩ keys(calibrated_parameters))),
+        data=merge(data, Dict(k => results[k] for k ∈ setdiff(keys(results), keys(parameters)))),
+        parameters=merge(parameters, Dict(k => results[k] for k ∈ keys(results) ∩ keys(parameters))),
         constraints=constraints,
         free_variables=free_variables)
 
