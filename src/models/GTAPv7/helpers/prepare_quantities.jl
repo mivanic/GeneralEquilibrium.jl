@@ -153,7 +153,7 @@ function prepare_quantities(; data, parameters, sets, hData)
         :evfp => hData["evfp"],
         :maks => hData["maks"],
         :vtwr => hData["vtwr"],
-        :vtwr => hData["vcif"],
+        :vcif => hData["vcif"],
         :evos => hData["evos"],
         :vdfp => hData["vdfp"],
         :vmfp => hData["vmfp"],
