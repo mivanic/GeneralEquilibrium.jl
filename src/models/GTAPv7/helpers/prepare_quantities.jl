@@ -51,7 +51,7 @@ function prepare_quantities(; data, parameters, sets, hData)
 
     qga = (vgd .+ vgm) ./ pga
 
-    vsave = hData["save"] .+ hData["vdep"]
+    vsave = hData["save"] #.+ hData["vdep"]
     qsave = vsave ./ psave
 
     vdip = hData["vdip"]
