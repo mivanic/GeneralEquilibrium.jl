@@ -5,6 +5,8 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
     δ_maks = data["maks"] .> 0
     δ_vtwr = data["vtwr"] .> 0
     δ_vtwr_sum = NamedArray(mapslices(sum, data["vtwr"], dims=1)[1, :, :, :] .> 0, names(data["vtwr"])[[2, 3, 4]])
+    δ_qxs = data["vcif"] .> 0
+
 
     # Read  sets
     (; reg, comm, marg, acts, endw, endwc, endws, endwm, endwms, endwf) = NamedTuple(Dict(Symbol(k) => sets[k] for k ∈ keys(sets)))
@@ -84,7 +86,7 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
             q_min <= qgm[comm, reg] <= q_max
 
             # Saving
-            q_min <= qsave[reg] <= q_max
+            -q_max <= qsave[reg] <= q_max
             p_min <= psave[reg] <= p_max
 
             # Investment consumption
@@ -168,7 +170,7 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
             1e-8 <= γ_pca[acts, reg]
             1e-8 <= σyp[reg] <= 1
             1e-8 <= σyg[reg] <= 1
-            1e-8 <= σsave[reg] <= 1
+            -1 <= σsave[reg] <= 1
             1e-8 <= α_qga[comm, reg] <= 1
             1e-8 <= γ_qga[reg]
             1e-8 <= α_qia[comm, reg] <= 1
@@ -212,7 +214,6 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
             0 <= vcif[comm, reg, reg]
             0 <= vst[marg, reg]
             0 <= vtwr[marg, comm, reg, reg]
-            0 <= save[reg]
             0 <= maks[comm, acts, reg]
         end
     )
@@ -283,7 +284,7 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
             e_pga, log.(qga .* pga) .== log.(pgd .* qgd .+ pgm .* qgm)
 
             # Saving
-            e_qsave, log.(psave .* qsave) .== log.(y .* (1 .- Vector(σyp) .- Vector(σyg)))
+            e_qsave, log.(y) .== log.(yp .+ yg .+ psave .* qsave)
 
             # Investment consumption
             e_qia[r=reg], log.(qia[:, r]) .== log.(demand_ces(qinv[r], pia[:, r], Vector(α_qia[:, r]), 0, γ_qia[r]))
@@ -294,7 +295,7 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
 
             # Trade - exports
             e_qms[c=comm, r=reg], log.(qms[c, r]) == log.(sum(qfm[c, :, r]) + qpm[c, r] + qgm[c, r] + qim[c, r])
-            e_qxs[c=comm, r=reg], log.(qxs[c, :, r]) .== log.(demand_ces(qms[c, r], Vector(pmds[c, :, r]), Vector(α_qxs[c, :, r]), esubm[c, r], γ_qxs[c, r]))
+            e_qxs[c=comm, r=reg], log.(Array(qxs[c, :, r])[δ_qxs[c, :, r]]) .== log.(demand_ces(qms[c, r], Vector(pmds[c, :, r])[δ_qxs[c, :, r]], Vector(α_qxs[c, :, r])[δ_qxs[c, :, r]], esubm[c, r], γ_qxs[c, r]))
             e_pms[c=comm, r=reg], log.(pms[c, r] * qms[c, r]) == log.(sum(pmds[c, :, r] .* qxs[c, :, r]))
 
             # Trade - margins
@@ -359,7 +360,6 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
             cvcif, log.(vcif) .== log.(pcif .* qxs)
             cvst[m=marg], log.(vst[m, :]) .== log.(pds[m, :] .* qst[m, :])
             cvtwr[c=comm, s=reg, d=reg], log.(Vector(vtwr[:, c, s, d])[δ_vtwr[:, c, s, d]]) .== log.(Vector(pt .* qtmfsd[:, c, s, d])[δ_vtwr[:, c, s, d]])
-            csave, log.(save) .== log.(psave .* qsave)
             cmaks, log.(Array(maks)[δ_maks]) .== log.(Array(ps .* qca)[δ_maks])
 
             # Soft parameter constraints
@@ -381,16 +381,27 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
     fix.(Array(evfp)[δ_evfp.==false], 0; force=true)
     fix.(Array(evos)[δ_evfp.==false], 0; force=true)
     fix.(Array(vtwr)[δ_vtwr.==false], 0; force=true)
+    fix.(Array(qxs)[δ_qxs.==false], 1e-6; force=true)
 
     for c = comm
         for s = reg
             for d = reg
-                if δ_vtwr_sum[c, s, d] == false
+                if (δ_vtwr_sum[c, s, d] == false) | (δ_qxs[c, s, d] == false)
                     delete(model, e_ptrans[c, s, d])
                     fix(ptrans[c, s, d], 0; force=true)
                 end
+               
+                if δ_qxs[c, s, d] == false
+                    delete(model, e_pcif[c, s, d])
+                    fix(pcif[c, s, d], 1; force=true)
+                    delete(model, cvfob[c, s, d])
+                    delete(model, cvcif[c, s, d])
+                    fix(vfob[c, s, d], 0; force=true)
+                    fix(vcif[c, s, d], 0; force=true)
+                end
+
                 for m = marg
-                    if δ_vtwr[m, c, s, d] == false
+                    if (δ_vtwr[m, c, s, d] == false) | (δ_qxs[c, s, d] == false)
                         delete(model, e_qtmfsd[m, c, s, d])
                         fix(qtmfsd[m, c, s, d], 0; force=true)
                     end
