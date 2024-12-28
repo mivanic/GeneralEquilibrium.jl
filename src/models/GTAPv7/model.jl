@@ -491,6 +491,7 @@ function model(; sets, data, parameters, fixed, calibrate=false, max_iter=50)
         set_upper_bound.(α_qxs, 1)
         unfix.(γ_qxs)
         set_lower_bound.(γ_qxs, 1e-8)
+        fix.(Array(α_qxs)[δ_qxs .== false],0; force = true)
         fix.(Array(vcif), data["vcif"]; force=true)
         fix.(ϵ_qxs, 1; force=true)
 
