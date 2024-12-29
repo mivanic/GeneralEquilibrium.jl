@@ -397,6 +397,8 @@ function model(; sets, data, parameters, fixed, max_iter=50)
         end
     end
 
+    delete.(model, Array(α_qtmfsd)[δ_vtwr.==false])
+
     for c = comm
         for s = reg
             for d = reg
