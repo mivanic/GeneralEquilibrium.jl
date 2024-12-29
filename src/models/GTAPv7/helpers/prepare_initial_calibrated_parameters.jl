@@ -228,7 +228,7 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
 
 
     δ = hData["vdep"] ./ hData["vkb"]
-    ρ = mapslices(sum, hData["evos"][endwc,:,:],dims=[1,2])[1,1,:] ./ hData["vkb"]
+    ρ = mapslices(sum, hData["evos"][endwc, :, :], dims=[1, 2])[1, 1, :] ./ hData["vkb"]
     # Return the new parameter values along with the old ones
     new_parameters = Dict(
         :α_qintva => α_qintva,
@@ -270,7 +270,11 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
 
     new_data = Dict(:u => NamedArray(value.(u2.data), reg))
 
-
-
-    return (parameters=merge(parameters, Dict(String(k) => new_parameters[k] for k ∈ keys(new_parameters))), data=merge(data, Dict(String(k) => new_data[k] for k ∈ keys(new_data))))
+    return (
+        parameters=parameters,
+        data=merge(
+            data,
+            Dict(String(k) => new_data[k] for k ∈ keys(new_data)),
+            Dict(String(k) => new_parameters[k] for k ∈ keys(new_parameters)))
+    )
 end
