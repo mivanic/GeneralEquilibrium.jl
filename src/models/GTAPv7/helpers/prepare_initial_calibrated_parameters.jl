@@ -229,6 +229,31 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
 
     δ = hData["vdep"] ./ hData["vkb"]
     ρ = mapslices(sum, hData["evos"][endwc, :, :], dims=[1, 2])[1, 1, :] ./ hData["vkb"]
+
+
+    # ϵs
+    ϵ_qxs = copy(γ_qxs)    
+    ϵ_qxs[] .= 1
+
+    ϵ_qfe = copy(γ_qfe)    
+    ϵ_qfe[] .= 1
+
+    ϵ_qes2 = copy(γ_qes2)    
+    ϵ_qes2[] .= 1
+
+    ϵ_qfdqfm = copy(γ_qfdqfm)    
+    ϵ_qfdqfm[] .= 1
+
+    ϵ_qpdqpm = copy(γ_qpdqpm)    
+    ϵ_qpdqpm[] .= 1
+
+    ϵ_qgdqgm = copy(γ_qgdqgm)    
+    ϵ_qgdqgm[] .= 1
+
+    ϵ_qidqim = copy(γ_qidqim)    
+    ϵ_qidqim[] .= 1
+
+
     # Return the new parameter values along with the old ones
     new_parameters = Dict(
         :α_qintva => α_qintva,
@@ -237,8 +262,10 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
         :γ_qfa => γ_qfa,
         :α_qfe => α_qfe,
         :γ_qfe => γ_qfe,
+        :ϵ_qfe => ϵ_qfe,
         :α_qfdqfm => α_qfdqfm,
         :γ_qfdqfm => γ_qfdqfm,
+        :ϵ_qfdqfm => ϵ_qfdqfm,
         :α_qca => α_qca,
         :γ_qca => γ_qca,
         :α_pca => α_pca,
@@ -248,21 +275,26 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
         :β_qpa => NamedArray(Array(value.(β)), axes(β)),
         :α_qpdqpm => α_qpdqpm,
         :γ_qpdqpm => γ_qpdqpm,
+        :ϵ_qpdqpm => ϵ_qpdqpm,
         :α_qga => α_qga,
         :γ_qga => γ_qga,
         :α_qgdqgm => α_qgdqgm,
         :γ_qgdqgm => γ_qgdqgm,
+        :ϵ_qgdqgm => ϵ_qgdqgm,
         :α_qia => α_qia,
         :γ_qia => γ_qia,
         :α_qidqim => α_qidqim,
         :γ_qidqim => γ_qidqim,
+        :ϵ_qidqim => ϵ_qidqim,
         :α_qxs => α_qxs,
         :γ_qxs => γ_qxs,
+        :ϵ_qxs => ϵ_qxs,
         :α_qtmfsd => α_qtmfsd,
         :α_qst => α_qst,
         :γ_qst => γ_qst,
         :α_qes2 => α_qes2[endws, :, :],
         :γ_qes2 => γ_qes2[endws, :],
+        :ϵ_qes2 => ϵ_qes2[endws, :],
         :α_qinv => α_qinv,
         :δ => δ,
         :ρ => ρ
