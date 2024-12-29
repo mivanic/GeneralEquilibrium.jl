@@ -380,8 +380,11 @@ function model(; sets, data, parameters, fixed, max_iter=50)
     fix.(Array(maks)[δ_maks.==false], 0; force=true)
     fix.(Array(evfp)[δ_evfp.==false], 0; force=true)
     fix.(Array(evos)[δ_evfp.==false], 0; force=true)
-    fix.(Array(vtwr)[δ_vtwr.==false], 0; force=true)
+    #fix.(Array(vtwr)[δ_vtwr.==false], 0; force=true)
     fix.(Array(qxs)[δ_qxs.==false], 1e-6; force=true)
+
+    delete.(model, Array(vtwr)[δ_vtwr.==false])
+    delete.(model, Array(cvtwr)[δ_vtwr.==false])
 
     for c = comm
         for s = reg
