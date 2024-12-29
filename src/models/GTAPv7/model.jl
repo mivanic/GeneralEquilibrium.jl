@@ -475,7 +475,7 @@ function model(; sets, data, parameters, fixed, max_iter=50)
         for fvi ∈ CartesianIndices(fixed[fv])
             if fixed[fv][fvi]
                 if isnan(data[fv][fvi])
-                    if is_valid(model, data[fv][fvi])
+                    if is_valid(model, model[Symbol(fv)][fvi])
                         delete(model, model[Symbol(fv)][fvi])
                     end
                 else
