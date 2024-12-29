@@ -383,8 +383,19 @@ function model(; sets, data, parameters, fixed, max_iter=50)
     #fix.(Array(vtwr)[δ_vtwr.==false], 0; force=true)
     fix.(Array(qxs)[δ_qxs.==false], 1e-6; force=true)
 
+    # Drop structurally missing vtwr
     delete.(model, Array(vtwr)[δ_vtwr.==false])
-    delete.(model, Array(cvtwr)[δ_vtwr.==false])
+    for c ∈ comm
+        for s ∈ reg
+            for d ∈ reg
+                if length(cvtwr[c,s,d]) == 0
+                    delete.(model, cvtwr[c,s,d])
+                else
+                    delete.(model, Array(cvtwr[c,s,d])[δ_vtwr[:,c,s,d].==false])
+                end
+            end
+        end
+    end
 
     for c = comm
         for s = reg
