@@ -37,7 +37,9 @@ function aggregate_data(; hData, hParameters, hSets, comMap, regMap, endMap)
                         "vdep" => GeneralEquilibrium.agg(hData["vdep"], [regMap]),
                         "vkb" => GeneralEquilibrium.agg(hData["vkb"], [regMap]),
                         "maks" => GeneralEquilibrium.agg(hData["maks"], [comMap, comMap, regMap]),
-                        "makb" => GeneralEquilibrium.agg(hData["makb"], [comMap, comMap, regMap]))
+                        "makb" => GeneralEquilibrium.agg(hData["makb"], [comMap, comMap, regMap]),
+                        "pop" => GeneralEquilibrium.agg(hData["pop"], [regMap])
+                        )
 
         # Generate the aggregated hParameters
         paramAg = Dict(

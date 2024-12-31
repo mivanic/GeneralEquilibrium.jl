@@ -8,7 +8,7 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
 
 
     # Read all data
-    (; pint, pva, qint, qva, qo, pfa, qfa, pfe, qfe, pfm, qfm, pfd, qfd, qca, ps, pca, qc, y, yp, yg, ppa, qpa, qpd, qpm, ppd, ppm, pgd, qgd, pgm, qgm, pga, qga, pgov, pid, qid, pim, qim, pia, qia, pinv, qinv, globalcgds, qxs, pmds, qms, qtmfsd, qtm, pds, qst, pes, qes, qe, u) = NamedTuple(Dict(Symbol(k) => data[k] for k ∈ keys(data)))
+    (; pint, pva, qint, qva, qo, pfa, qfa, pfe, qfe, pfm, qfm, pfd, qfd, qca, ps, pca, qc, y, yp, yg, ppa, qpa, qpd, qpm, ppd, ppm, pgd, qgd, pgm, qgm, pga, qga, pgov, pid, qid, pim, qim, pia, qia, pinv, qinv, globalcgds, qxs, pmds, qms, qtmfsd, qtm, pds, qst, pes, qes, qe, u, pop) = NamedTuple(Dict(Symbol(k) => data[k] for k ∈ keys(data)))
 
     # Helper function
     function ρ(σ)
@@ -127,7 +127,7 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
 
     @constraints(m,
         begin
-            c[r=reg], log.([Vector(qpa[:, r]); 1]) .== log.(cde(Vector(1 .- subpar[:, r]), Vector(β[:, r]), Vector(incpar[:, r]), u2[r], Vector(ppa[:, r]), cy[r]))
+            c[r=reg], log.([Vector(qpa[:, r] / pop[r]); 1]) .== log.(cde(Vector(1 .- subpar[:, r]), Vector(β[:, r]), Vector(incpar[:, r]), u2[r], Vector(ppa[:, r]), cy[r] / pop[r]))
         end
     )
 

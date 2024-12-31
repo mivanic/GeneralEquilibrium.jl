@@ -70,6 +70,7 @@ function prepare_initial_values(; sets, hData, hParameters)
     ptrans = NamedArray(ones(length(comm), length(reg), length(reg)), (comm, reg, reg))
     qe = NamedArray(mapslices(sum, hData["evos"], dims=[2])[:, 1, :], (endw, reg))[endwms, reg]
 
+    pop = hData["pop"]
 
     return (data = Dict(
         "pint" => pint,
@@ -112,7 +113,8 @@ function prepare_initial_values(; sets, hData, hParameters)
         "yg" => yg,
         "walras_sup" => walras_sup,
         "walras_dem" => walras_dem,
-        "qe" => qe
+        "qe" => qe,
+        "pop" => pop
     ))
 
 end

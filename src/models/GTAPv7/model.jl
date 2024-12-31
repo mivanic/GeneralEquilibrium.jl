@@ -30,6 +30,9 @@ function model(; sets, data, parameters, fixed, max_iter=50)
     # All variables used in the model
     @variables(model,
         begin
+            # Population
+            q_min <= pop[reg] <= q_max
+
             # Firms top nest
             q_min <= qint[acts, reg] <= q_max
             p_min <= pint[acts, reg] <= p_max
@@ -270,7 +273,7 @@ function model(; sets, data, parameters, fixed, max_iter=50)
             e_yp, log.(yp) .== log.(y .* Vector(σyp))
 
             # Household consumption
-            e_qpa[r=reg], log.([Vector(qpa[:, r]); 1]) .== log.(cde(Vector(1 .- subpar[:, r]), Vector(β_qpa[:, r]), Vector(incpar[:, r]), u[r], Vector(ppa[:, r]), yp[r]))
+            e_qpa[r=reg], log.([Vector(qpa[:, r] / pop[r]); 1]) .== log.(cde(Vector(1 .- subpar[:, r]), Vector(β_qpa[:, r]), Vector(incpar[:, r]), u[r], Vector(ppa[:, r]), yp[r] / pop[r]))
             e_qpdqpm[c=comm, r=reg], log.([qpd[c, r], qpm[c, r]]) .== log.(demand_ces(qpa[c, r], [ppd[c, r], ppm[c, r]], α_qpdqpm[:, c, r], esubd[c, r], γ_qpdqpm[c, r]))
             e_ppa, log.(qpa .* ppa) .== log.(ppd .* qpd .+ ppm .* qpm)
 
