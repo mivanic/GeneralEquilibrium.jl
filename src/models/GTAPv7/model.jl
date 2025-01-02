@@ -178,6 +178,7 @@ function model(; sets, data, parameters, fixed, max_iter=50)
             1e-8 <= γ_qga[reg]
             1e-8 <= α_qia[comm, reg] <= 1
             1e-8 <= γ_qia[reg]
+            1e-8 <= ϵ_qia[reg]
             1e-8 <= α_qpdqpm[["dom", "imp"], acts, reg] <= 1
             1e-8 <= γ_qpdqpm[acts, reg]
             0 <= ϵ_qpdqpm[acts, reg]
@@ -373,6 +374,7 @@ function model(; sets, data, parameters, fixed, max_iter=50)
             sf_α_qpdqpm[c=comm, r=reg], log(sum(α_qpdqpm[:, c, r])) == log(ϵ_qpdqpm[c, r])
             sf_α_qgdqgm[c=comm, r=reg], log(sum(α_qgdqgm[:, c, r])) == log(ϵ_qgdqgm[c, r])
             sf_α_qidqim[c=comm, r=reg], log(sum(α_qidqim[:, c, r])) == log(ϵ_qidqim[c, r])
+            sf_α_qia[c=comm, r=reg], log(sum(α_qia[c, r])) == log(ϵ_qia[r])
             sf_save, log.(σsave .+ σyp .+ σyg) .== log(1)
         end
     )
