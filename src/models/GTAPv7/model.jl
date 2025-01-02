@@ -523,6 +523,7 @@ function model(; sets, data, parameters, fixed, max_iter=50)
         data=merge(data, Dict(k => results[k] for k ∈ setdiff(keys(results), keys(parameters)))),
         parameters=merge(parameters, Dict(k => results[k] for k ∈ keys(results) ∩ keys(parameters))),
         constraints=constraints,
-        free_variables=free_variables)
+        free_variables=free_variables,
+        all_variables = all_variables(model))
 
 end
