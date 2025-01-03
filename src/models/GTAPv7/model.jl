@@ -1,4 +1,4 @@
-function model(; sets, data, parameters, fixed, max_iter=50)
+function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1e-5)
 
     # Structural parameters (some CES/CET options are not happening)
     δ_evfp = data["evfp"] .> 0
@@ -493,7 +493,8 @@ function model(; sets, data, parameters, fixed, max_iter=50)
     end
 
     set_attribute(model, "max_iter", max_iter)
-
+    set_attribute(model, "constr_viol_tol", constr_viol_tol)
+    
     # # Summary of constraints and free variables
     constraints = all_constraints(model; include_variable_in_set_constraints=false)
     free_variables = filter((x) -> is_fixed.(x) == false, all_variables(model))
