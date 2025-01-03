@@ -176,7 +176,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
             -1 <= σsave[reg] <= 1
             1e-8 <= α_qga[comm, reg] <= 1
             1e-8 <= γ_qga[reg]
-            1e-8 <= α_qia[comm, reg] <= 1
+            0 <= α_qia[comm, reg] <= 1
             1e-8 <= γ_qia[reg]
             1e-8 <= ϵ_qia[reg]
             1e-8 <= α_qpdqpm[["dom", "imp"], acts, reg] <= 1
