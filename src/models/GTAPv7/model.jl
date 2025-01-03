@@ -1,4 +1,4 @@
-function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1e-5)
+function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1e-5, bound_push = 0)
 
     # Structural parameters (some CES/CET options are not happening)
     δ_evfp = data["evfp"] .> 0
@@ -176,7 +176,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
             -1 <= σsave[reg] <= 1
             1e-8 <= α_qga[comm, reg] <= 1
             1e-8 <= γ_qga[reg]
-            0 <= α_qia[comm, reg] <= 1
+            1e-8 <= α_qia[comm, reg] <= 1
             1e-8 <= γ_qia[reg]
             1e-8 <= ϵ_qia[reg]
             1e-8 <= α_qpdqpm[["dom", "imp"], acts, reg] <= 1
@@ -494,6 +494,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
 
     set_attribute(model, "max_iter", max_iter)
     set_attribute(model, "constr_viol_tol", constr_viol_tol)
+    set_attribute(model, "bound_push", bound_push)
     
     # # Summary of constraints and free variables
     constraints = all_constraints(model; include_variable_in_set_constraints=false)
