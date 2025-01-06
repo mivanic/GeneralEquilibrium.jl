@@ -1,12 +1,11 @@
-function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1e-5, bound_push = 1e-15)
+function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-5, bound_push=1e-15)
 
     # Structural parameters (some CES/CET options are not happening)
-    δ_evfp = data["evfp"] .> 0
-    δ_maks = data["maks"] .> 0
-    δ_vtwr = data["vtwr"] .> 0
-    δ_vtwr_sum = NamedArray(mapslices(sum, data["vtwr"], dims=1)[1, :, :, :] .> 0, names(data["vtwr"])[[2, 3, 4]])
-    δ_qxs = data["vcif"] .> 0
-
+    δ_evfp = data["evfp"] .> 1e-6
+    δ_maks = data["maks"] .> 1e-6
+    δ_vtwr = data["vtwr"] .> 1e-6
+    δ_vtwr_sum = NamedArray(mapslices(sum, data["vtwr"], dims=1)[1, :, :, :] .> 1e-6, names(data["vtwr"])[[2, 3, 4]])
+    δ_qxs = data["vcif"] .> 1e-6
 
     # Read  sets
     (; reg, comm, marg, acts, endw, endwc, endws, endwm, endwms, endwf) = NamedTuple(Dict(Symbol(k) => sets[k] for k ∈ keys(sets)))
@@ -222,6 +221,43 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
         end
     )
 
+    JuMP.all_variables(model)[1889]
+
+    # Remove structurally missing variables
+
+    # Remove qfe, qes, pfe, peb, α_qes2, α_qfe, cevos, cevfp if there is no use of the factor
+    delete.(model, Array(qfe)[.!δ_evfp])
+    delete.(model, Array(qes)[.!δ_evfp])
+    delete.(model, Array(pes)[.!δ_evfp])
+    delete.(model, Array(pfe)[.!δ_evfp])
+    delete.(model, Array(peb)[.!δ_evfp])
+    delete.(model, Array(α_qes2[endws, :, :])[.!δ_evfp[endws, :, :]])
+    delete.(model, Array(α_qfe)[.!δ_evfp])
+    delete.(model, Array(evos)[.!δ_evfp])
+    delete.(model, Array(evfp)[.!δ_evfp])
+
+    # Remove maks when there is no output produced
+    delete.(model, Array(maks)[.!δ_maks])
+    delete.(model, Array(ps)[.!δ_maks])
+    delete.(model, Array(qca)[.!δ_maks])
+    delete.(model, Array(pca)[.!δ_maks])
+    delete.(model, Array(α_qca)[.!δ_maks])
+
+    # Remove trade when no trade is allowed
+    delete.(model, Array(α_qxs)[.!δ_qxs])
+    delete.(model, Array(qxs)[.!δ_qxs])
+    delete.(model, Array(pmds)[.!δ_qxs])
+    delete.(model, Array(pcif)[.!δ_qxs])
+    delete.(model, Array(pfob)[.!δ_qxs])
+    delete.(model, Array(ptrans)[.!δ_qxs.||.!δ_vtwr_sum])
+    delete.(model, Array(vcif)[.!δ_qxs])
+    delete.(model, Array(vfob)[.!δ_qxs])
+
+    # Remove margins when no margins are allowed
+    delete.(model, Array(qtmfsd)[.!δ_vtwr])
+    delete.(model, Array(α_qtmfsd)[.!δ_vtwr])
+    delete.(model, Array(vtwr)[.!δ_vtwr])
+
 
     #(;pcif,qo,pcgdswld,tpd,pfd,globalcgds,pint,pfm,qxs,pt,qfd,pga,qtm,tid,ppa,y,pgov,pgd,qid,pmds,qpa,qes,qva,tinc,peb,qpm,qst,psave,txs,qsave,tfd,pfob,qesf,pms,tgm,pca,qfe,tm,qe,ps,pfa,pid,pva,pe,qc,qinv,tms,to,tx,pgm,pfe,qga,walras_dem,u,qpd,pia,walras_sup,qim,po,ppd,qtmfsd,pim,tgd,pes,qfa,tfe,ppm,qint,qds,yp,qca,tim,pinv,tpm,qgm,fincome,pds,qia,qgd,qfm,ptrans,tfm,yg,qms) = NamedTuple(data)
 
@@ -235,16 +271,16 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
             # Firms (second nest)
             e_qfa[a=acts, r=reg], log.(qfa[:, a, r]) .== log.(demand_ces(qint[a, r], pfa[:, a, r], Vector(α_qfa[:, a, r]), esubc[a, r], γ_qfa[a, r]))
             e_pint[a=acts, r=reg], log.(qint[a, r] * pint[a, r]) == log.(sum(pfa[:, a, r] .* qfa[:, a, r]))
-            e_qfe[a=acts, r=reg], log.(Vector(qfe[:, a, r])[δ_evfp[:, a, r]]) .== log.(Vector(demand_ces(qva[a, r], Vector(pfe[:, a, r])[δ_evfp[:, a, r]], Vector(α_qfe[:, a, r])[δ_evfp[:, a, r]], esubva[a, r], γ_qfe[a, r])))
-            e_pva[a=acts, r=reg], log.(qva[a, r] * pva[a, r]) == log.(sum(Vector(pfe[:, a, r] .* qfe[:, a, r])[δ_evfp[:, a, r]]))
+            e_qfe[a=acts, r=reg], log.(Vector(qfe[:, a, r])[δ_evfp[:, a, r]]) .== log.(Vector(demand_ces(qva[a, r], Vector(pfe[:, a, r])[δ_evfp[:, a, r].!=0], Vector(α_qfe[:, a, r])[δ_evfp[:, a, r].!=0], esubva[a, r], γ_qfe[a, r])))
+            e_pva[a=acts, r=reg], log.(qva[a, r] * pva[a, r]) == log.(sum(Vector(pfe[:, a, r] .* qfe[:, a, r])[δ_evfp[:, a, r].!=0]))
             e_qfdqfm[c=comm, a=acts, r=reg], log.([qfd[c, a, r], qfm[c, a, r]]) .== log.(demand_ces(qfa[c, a, r], [pfd[c, a, r], pfm[c, a, r]], α_qfdqfm[:, c, a, r], esubd[c, r], γ_qfdqfm[c, a, r]))
             e_pfa, log.(pfa .* qfa) .== log.(qfd .* pfd .+ qfm .* pfm)
 
             # Firms (distribution)
             e_qca[a=acts, r=reg], log.(Vector(qca[:, a, r])[δ_maks[:, a, r]]) .== log.(Vector(demand_ces(qo[a, r], Vector(ps[:, a, r])[δ_maks[:, a, r]], Vector(α_qca[:, a, r])[δ_maks[:, a, r]], etraq[a, r], γ_qca[a, r])))
-            e_po[a=acts, r=reg], log.(po[a, r] * qo[a, r]) == log.(sum(qca[:, a, r] .* ps[:, a, r]))
+            e_po[a=acts, r=reg], log.(po[a, r] * qo[a, r]) == log.(sum(Vector(qca[:, a, r] .* ps[:, a, r])[δ_maks[:, a, r]]))
             e_pca[c=comm, r=reg], log.((esubq[c, r] == 0 ? Vector(pca[c, :, r])[δ_maks[c, :, r]] : Vector(qca[c, :, r])[δ_maks[c, :, r]])) .== log.((esubq[c, r] == 0 ? pds[c, r] : Vector(demand_ces(qc[c, r], Vector(pca[c, :, r])[δ_maks[c, :, r]], Vector(α_pca[c, :, r])[δ_maks[c, :, r]], 1 / esubq[c, r], γ_pca[c, r]))))
-            e_qc[c=comm, r=reg], log.(pds[c, r] * qc[c, r]) == log.(sum(pca[c, :, r] .* qca[c, :, r]))
+            e_qc[c=comm, r=reg], log.(pds[c, r] * qc[c, r]) == log.(sum(Array(pca[c, :, r] .* qca[c, :, r])[δ_maks[c, :, r]]))
             e_ps, log.(pca) .== log.(ps .* to)
 
             # Endowments
@@ -252,7 +288,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
             e_pfe[e=endw, a=acts, r=reg], log.(pfe[e, a, r]) == log.(peb[e, a, r] .* tfe[e, a, r])
 
             # Income
-            e_fincome[r=reg], log.(fincome[r]) == log.(sum(peb[:, :, r] .* qes[:, :, r]) .- δ[r] .* pinv[r] .* kb[r])
+            e_fincome[r=reg], log.(fincome[r]) == log.(sum(Array(peb[:, :, r] .* qes[:, :, r])[δ_evfp[:, :, r]]) .- δ[r] .* pinv[r] .* kb[r])
             e_y[r=reg], log(y[r]) ==
                         log(
                 fincome[r] +
@@ -264,10 +300,10 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
                 sum(qim[:, r] .* pms[:, r] .* (tim[:, r] .- 1)) +
                 sum(qfd[:, :, r] .* pfd[:, :, r] ./ tfd[:, :, r] .* (tfd[:, :, r] .- 1)) +
                 sum(qfm[:, :, r] .* pfm[:, :, r] ./ tfm[:, :, r] .* (tfm[:, :, r] .- 1)) +
-                sum(qca[:, :, r] .* ps[:, :, r] .* (to[:, :, r] .- 1)) +
-                sum(qfe[:, :, r] .* peb[:, :, r] .* (tfe[:, :, r] .- 1)) +
-                sum(qxs[:, r, :] .* pfob[:, r, :] ./ txs[:, r, :] .* (txs[:, r, :] .- 1)) +
-                sum(qxs[:, :, r] .* pcif[:, :, r] .* (tms[:, :, r] .- 1))
+                sum(Array(qca[:, :, r] .* ps[:, :, r] .* (to[:, :, r] .- 1))[δ_maks[:, :, r]]) +
+                sum(Array(qfe[:, :, r] .* peb[:, :, r] .* (tfe[:, :, r] .- 1))[δ_evfp[:, :, r]]) +
+                sum(Array(qxs[:, r, :] .* pfob[:, r, :] ./ txs[:, r, :] .* (txs[:, r, :] .- 1))[δ_qxs[:, r, :]]) +
+                sum(Array(qxs[:, :, r] .* pcif[:, :, r] .* (tms[:, :, r] .- 1))[δ_qxs[:, :, r]])
             )
 
             # Household Income
@@ -300,23 +336,23 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
             # Trade - exports
             e_qms[c=comm, r=reg], log.(qms[c, r]) == log.(sum(qfm[c, :, r]) + qpm[c, r] + qgm[c, r] + qim[c, r])
             e_qxs[c=comm, r=reg], log.(Array(qxs[c, :, r])[δ_qxs[c, :, r]]) .== log.(demand_ces(qms[c, r], Vector(pmds[c, :, r])[δ_qxs[c, :, r]], Vector(α_qxs[c, :, r])[δ_qxs[c, :, r]], esubm[c, r], γ_qxs[c, r]))
-            e_pms[c=comm, r=reg], log.(pms[c, r] * qms[c, r]) == log.(sum(pmds[c, :, r] .* qxs[c, :, r]))
+            e_pms[c=comm, r=reg], log.(pms[c, r] * qms[c, r]) == log.(sum(Vector(pmds[c, :, r] .* qxs[c, :, r])[δ_qxs[c, :, r]]))
 
             # Trade - margins
             e_qtmfsd[m=marg, c=comm, s=reg, d=reg], log.(qtmfsd[m, c, s, d]) .== log.(α_qtmfsd[m, c, s, d] .* qxs[c, s, d])
-            e_ptrans[c=comm, s=reg, d=reg], log.(ptrans[c, s, d] * sum(qtmfsd[:, c, s, d])) == log.(sum(qtmfsd[:, c, s, d] .* pt[:]))
-            e_qtm[m=marg], log.(qtm[m]) == log.(sum(qtmfsd[m, :, :, :]))
+            e_ptrans[c=comm, s=reg, d=reg], log.(ptrans[c, s, d] * sum(Vector(qtmfsd[:, c, s, d])[δ_vtwr[:, c, s, d]]; init=0.0)) == log.(sum(Vector(qtmfsd[:, c, s, d])[δ_vtwr[:, c, s, d]] .* Vector(pt[:]); init=0.0))
+            e_qtm[m=marg], log.(qtm[m]) == log.(sum(Array(qtmfsd[m, :, :, :])[δ_vtwr[m, :, :, :]]))
             e_qst[m=marg], log.(qst[m, :]) .== log.(demand_ces(qtm[m], pds[m, :], Vector(α_qst[m, :]), esubs[m], γ_qst[m]))
             e_pt[m=marg], log.(pt[m] * qtm[m]) == log.(sum(pds[m, :] .* qst[m, :]))
 
             # Trade - imports / exports
             e_pfob[c=comm, s=reg, d=reg], log(pfob[c, s, d]) == log(pds[c, s] * tx[c, s] * txs[c, s, d])
-            e_pcif[c=comm, s=reg, d=reg], log(pcif[c, s, d] * qxs[c, s, d]) == log(pfob[c, s, d] * (qxs[c, s, d]) + ptrans[c, s, d] * sum(qtmfsd[:, c, s, d]))
+            e_pcif[c=comm, s=reg, d=reg], log(pcif[c, s, d] * qxs[c, s, d]) == log(pfob[c, s, d] * (qxs[c, s, d]) + (δ_vtwr_sum[c, s, d] ? ptrans[c, s, d] * sum(Vector(qtmfsd[:, c, s, d])[δ_vtwr[:, c, s, d]]) : 0))
             e_pmds[c=comm, s=reg, d=reg], log(pmds[c, s, d]) == log(pcif[c, s, d] * tm[c, d] * tms[c, s, d])
 
             # Domestic market clearing 
             e_qds[c=comm, r=reg], log(qds[c, r]) == log(sum(qfd[c, :, r]) + qpd[c, r] + qgd[c, r] + qid[c, r])
-            e_pds[c=comm, r=reg], log(qc[c, r]) == log(qds[c, r] + sum(qxs[c, r, :]) + (c ∈ marg ? qst[c, r] : 0))
+            e_pds[c=comm, r=reg], log(qc[c, r]) == log(qds[c, r] + sum(Vector(qxs[c, r, :])[δ_qxs[c, r, :]]) + (c ∈ marg ? qst[c, r] : 0))
 
             # Taxes
             e_pfd[c=comm, a=acts, r=reg], log(pfd[c, a, r]) == log(pds[c, r] * tfd[c, a, r])
@@ -329,10 +365,10 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
             e_pim, log.(pim) .== log.(pms .* tim)
 
             # Factor Market
-            e_pe1[e=endwm, r=reg], log.(qe[e, r]) == log.(sum(qfe[e, :, r]))
+            e_pe1[e=endwm, r=reg], log.(qe[e, r]) == log.(sum(Vector(qfe[e, :, r])[δ_evfp[e, :, r]]))
             e_qes1[e=endwm, a=acts, r=reg], log(pes[e, a, r]) == log(pe[e, r])
             e_qes2[e=endws, r=reg], log.(Vector(qes[e, :, r])[δ_evfp[e, :, r]]) .== log.(Vector(demand_ces(qe[e, r], Vector(pes[e, :, r])[δ_evfp[e, :, r]], Vector(α_qes2[e, :, r])[δ_evfp[e, :, r]], etrae[e, r], γ_qes2[e, r])))
-            e_pe2[e=endws, r=reg], log(pe[e, r] * qe[e, r]) == log(sum(pes[e, :, r] .* qes[e, :, r]))
+            e_pe2[e=endws, r=reg], log(pe[e, r] * qe[e, r]) == log(sum(Vector(pes[e, :, r] .* qes[e, :, r])[δ_evfp[e, :, r]]))
             e_qes3[e=endwf, a=acts, r=reg], log(qes[e, a, r]) == log(qesf[e, a, r])
             e_pes[e=endw, a=acts, r=reg], log(peb[e, a, r]) == log(pes[e, a, r] * tinc[e, a, r])
 
@@ -358,13 +394,13 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
             cvmgp, log.(vmgp) .== log.(pgm .* qgm)
             cvdip, log.(vdip) .== log.(pid .* qid)
             cvmip, log.(vmip) .== log.(pim .* qim)
-            cevfp, log.(Array(evfp)[δ_evfp]) .== log.(Array(pfe .* qfe)[δ_evfp])
-            cevos, log.(Array(evos)[δ_evfp]) .== log.(Array(pes .* qes)[δ_evfp])
+            cevfp, log.(Array(evfp)) .== log.(Array(pfe .* qfe))
+            cevos, log.(Array(evos)) .== log.(Array(pes .* qes))
             cvfob, log.(vfob) .== log.(pfob .* qxs)
             cvcif, log.(vcif) .== log.(pcif .* qxs)
             cvst[m=marg], log.(vst[m, :]) .== log.(pds[m, :] .* qst[m, :])
             cvtwr[c=comm, s=reg, d=reg], log.(Vector(vtwr[:, c, s, d])[δ_vtwr[:, c, s, d]]) .== log.(Vector(pt .* qtmfsd[:, c, s, d])[δ_vtwr[:, c, s, d]])
-            cmaks, log.(Array(maks)[δ_maks]) .== log.(Array(ps .* qca)[δ_maks])
+            cmaks, log.(maks) .== log.(ps .* qca)
 
             # Soft parameter constraints
             sf_α_qxs[c=comm, d=reg], log(sum(α_qxs[c, :, d])) == log(ϵ_qxs[c, d])
@@ -379,88 +415,42 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
         end
     )
 
-    # Structurally zero variables
-    fix.(Array(qca)[δ_maks.==false], 0; force=true)
-    fix.(Array(pca)[δ_maks.==false], 1; force=true)
-    fix.(Array(maks)[δ_maks.==false], 0; force=true)
-    fix.(Array(evfp)[δ_evfp.==false], 0; force=true)
-    fix.(Array(evos)[δ_evfp.==false], 0; force=true)
-    #fix.(Array(vtwr)[δ_vtwr.==false], 0; force=true)
-    fix.(Array(qxs)[δ_qxs.==false], 1e-6; force=true)
+    # Remove equations on structural grounds
 
-    # Drop structurally missing vtwr
-    delete.(model, Array(vtwr)[δ_vtwr.==false])
+    # Factors not used
+    delete.(model, Array(cevos)[.!δ_evfp])
+    delete.(model, Array(cevfp)[.!δ_evfp])
+    delete.(model, Array(e_pfe)[.!δ_evfp])
+    delete.(model, Array(e_peb)[.!δ_evfp])
+    delete.(model, Array(e_pes)[.!δ_evfp])
+    delete.(model, Array(e_qes1)[.!δ_evfp[endwm, :, :]])
+    delete.(model, Array(e_qes3)[.!δ_evfp[endwf, :, :]])
+
+    # Outputs not produced
+    delete.(model, Array(cmaks)[.!δ_maks])
+    delete.(model, Array(e_ps)[.!δ_maks])
+
+    # Trade not allowed
+    delete.(model, Array(e_pmds)[.!δ_qxs])
+    delete.(model, Array(e_pcif)[.!δ_qxs])
+    delete.(model, Array(e_pfob)[.!δ_qxs])
+    delete.(model, Array(e_ptrans)[.!δ_qxs])
+    delete.(model, Array(cvcif)[.!δ_qxs])
+    delete.(model, Array(cvfob)[.!δ_qxs])
+
+    # Margins not allowed
+
+    delete.(model, Array(e_qtmfsd)[.!δ_vtwr])
+    delete.(model, Array(e_ptrans)[δ_qxs.&&.!δ_vtwr_sum])
     for c ∈ comm
         for s ∈ reg
             for d ∈ reg
-                if length(cvtwr[c,s,d]) == 0
-                    delete.(model, cvtwr[c,s,d])
-                else
-                    delete.(model, Array(cvtwr[c,s,d])[δ_vtwr[:,c,s,d].==false])
-                end
+                #delete.(model, Array(cvtwr[c,s,d])[.!δ_vtwr[:,c,s,d]])
             end
         end
     end
 
-    delete.(model, Array(α_qtmfsd)[δ_vtwr.==false])
-
-    for c = comm
-        for s = reg
-            for d = reg
-                if (δ_vtwr_sum[c, s, d] == false) | (δ_qxs[c, s, d] == false)
-                    delete(model, e_ptrans[c, s, d])
-                    fix(ptrans[c, s, d], 0; force=true)
-                end
-               
-                if δ_qxs[c, s, d] == false
-                    delete(model, e_pcif[c, s, d])
-                    fix(pcif[c, s, d], 1; force=true)
-                    delete(model, cvfob[c, s, d])
-                    delete(model, cvcif[c, s, d])
-                    fix(vfob[c, s, d], 0; force=true)
-                    fix(vcif[c, s, d], 0; force=true)
-                end
-
-                for m = marg
-                    if (δ_vtwr[m, c, s, d] == false) | (δ_qxs[c, s, d] == false)
-                        delete(model, e_qtmfsd[m, c, s, d])
-                        fix(qtmfsd[m, c, s, d], 0; force=true)
-                    end
-                end
-            end
-        end
-    end
-
-    for a = acts
-        for r = reg
-            for e = endw
-                if δ_evfp[e, a, r] == false
-                    fix(qfe[e, a, r], 0; force=true)
-                    fix(peb[e, a, r], 0; force=true)
-                    fix(pes[e, a, r], 0; force=true)
-                    fix(pfe[e, a, r], 0; force=true)
-                    delete(model, e_peb[e, a, r])
-                    delete(model, e_pes[e, a, r])
-                    delete(model, e_pfe[e, a, r])
-                end
-            end
-            for e = endws
-                if δ_evfp[e, a, r] == false
-                    fix(qes[e, a, r], 0; force=true)
-                end
-            end
-            for e = endwf
-                if δ_evfp[e, a, r] == false
-                    fix(qes[e, a, r], 0; force=true)
-                    delete(model, e_qes3[e, a, r])
-                end
-            end
-
-        end
-    end
-
-
-    free_variables = filter((x) -> is_fixed.(x) == false, all_variables(model))
+    free_variables = filter((x) -> is_fixed.(x) == false, JuMP.all_variables(model))
     for v ∈ free_variables
         set_start_value.(v, 1.01)
     end
@@ -495,7 +485,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
     set_attribute(model, "max_iter", max_iter)
     set_attribute(model, "constr_viol_tol", constr_viol_tol)
     set_attribute(model, "bound_push", bound_push)
-    
+
     # # Summary of constraints and free variables
     constraints = all_constraints(model; include_variable_in_set_constraints=false)
     free_variables = filter((x) -> is_fixed.(x) == false, all_variables(model))
@@ -526,6 +516,6 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol = 1
         parameters=merge(parameters, Dict(k => results[k] for k ∈ keys(results) ∩ keys(parameters))),
         constraints=constraints,
         free_variables=free_variables,
-        all_variables = all_variables(model))
+        all_variables=all_variables(model))
 
 end
