@@ -174,7 +174,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             1e-8 <= σyg[reg] <= 1
             -1 <= σsave[reg] <= 1
             1e-8 <= α_qga[comm, reg] <= 1
-            1e-8 <= ϵ_qga[comm, reg]
+            1e-8 <= ϵ_qga[reg]
             1e-8 <= γ_qga[reg]
             1e-8 <= α_qia[comm, reg] <= 1
             1e-8 <= γ_qia[reg]
