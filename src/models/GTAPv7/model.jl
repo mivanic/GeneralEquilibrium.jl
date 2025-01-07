@@ -405,7 +405,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             # Soft parameter constraints
             sf_α_qxs[c=comm, d=reg], log(sum(Vector(α_qxs[c, :, d])[δ_qxs[c,:,d]])) == log(ϵ_qxs[c, d])
             sf_α_qfe[a=acts, r=reg], log(sum(Vector(α_qfe[:, a, r])[δ_evfp[:,a,r]])) == log(ϵ_qfe[a, r])
-            sf_α_qes2[e=endws, r=reg], log(Vector(sum(α_qes2[e, :, r])[δ_evfp[e,:,r]])) == log(ϵ_qes2[e, r])
+            sf_α_qes2[e=endws, r=reg], log(sum(Vector(α_qes2[e, :, r])[δ_evfp[e,:,r]])) == log(ϵ_qes2[e, r])
             sf_α_qfdqfm[c=comm, a=acts, r=reg], log(sum(α_qfdqfm[:, c, a, r])) == log(ϵ_qfdqfm[c, a, r])
             sf_α_qpdqpm[c=comm, r=reg], log(sum(α_qpdqpm[:, c, r])) == log(ϵ_qpdqpm[c, r])
             sf_α_qgdqgm[c=comm, r=reg], log(sum(α_qgdqgm[:, c, r])) == log(ϵ_qgdqgm[c, r])
