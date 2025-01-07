@@ -446,13 +446,6 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
 
     delete.(model, Array(e_qtmfsd)[.!δ_vtwr])
     delete.(model, Array(e_ptrans)[δ_qxs.&&.!δ_vtwr_sum])
-    for c ∈ comm
-        for s ∈ reg
-            for d ∈ reg
-                #delete.(model, Array(cvtwr[c,s,d])[.!δ_vtwr[:,c,s,d]])
-            end
-        end
-    end
 
     free_variables = filter((x) -> is_fixed.(x) == false, JuMP.all_variables(model))
     for v ∈ free_variables
@@ -474,11 +467,9 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
     # Fix fixed values and delete missing ones
     for fv ∈ keys(fixed)
         for fvi ∈ CartesianIndices(fixed[fv])
-            if fixed[fv][fvi]
+            if fixed[fv][fvi] && is_valid(model, model[Symbol(fv)][fvi])
                 if isnan(data[fv][fvi])
-                    if is_valid(model, model[Symbol(fv)][fvi])
-                        delete(model, model[Symbol(fv)][fvi])
-                    end
+                    delete(model, model[Symbol(fv)][fvi])
                 else
                     fix(model[Symbol(fv)][fvi], data[fv][fvi]; force=true)
                 end
@@ -512,7 +503,6 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             end for (k, v) in object_dictionary(model)
             if v isa VariableRef
         ))
-
 
     return (
         sets=sets,
