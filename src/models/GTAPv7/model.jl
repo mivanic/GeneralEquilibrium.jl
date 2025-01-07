@@ -222,8 +222,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             0 <= maks[comm, acts, reg]
 
             # Shares (helpers to calibrate)
-            0 <= σ_vp[com, reg]
-            0 <= σ_vdp[com, reg]
+            0 <= σ_vp[comm, reg]
+            0 <= σ_vdp[comm, reg]
         end
     )
 
