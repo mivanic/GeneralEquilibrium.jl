@@ -224,10 +224,9 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             # Shares (helpers to calibrate)
             0 <= σ_vp[comm, reg]
             0 <= σ_vdp[comm, reg]
+            0 <= σ_qxs[comm, reg, reg]
         end
     )
-
-    JuMP.all_variables(model)[1889]
 
     # Remove structurally missing variables
 
@@ -258,6 +257,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
     delete.(model, Array(ptrans)[.!δ_qxs.||.!δ_vtwr_sum])
     delete.(model, Array(vcif)[.!δ_qxs])
     delete.(model, Array(vfob)[.!δ_qxs])
+    delete.(model, Array(σ_qxs)[.!δ_qxs])
 
     # Remove margins when no margins are allowed
     delete.(model, Array(qtmfsd)[.!δ_vtwr])
@@ -424,6 +424,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             # Shares (helpers)
             e_σ_vp[c=comm, r = reg], σ_vp[c,r] * sum(ppd[:,r].*qpd[:,r] .+ ppm[:,r].*qpm[:,r]) == ppd[c,r] .* qpd[c,r] + ppm[c,r].*qpm[c,r]
             e_σ_vdp[c=comm, r = reg], σ_vdp[c,r] * (ppd[c,r].*qpd[c,r] .+ ppm[c,r].*qpm[c,r]) == ppd[c,r] .* qpd[c,r]
+            e_σ_qxs[c=comm, s = reg, d = reg], σ_qxs[c,s,d] * sum(Vector(pcif[c,:,d] .* qxs[c,:,d])[δ_qxs[c,:,d]])== pcif[c,s,d] .* qxs[c,s,d]
         end
     )
 
@@ -449,6 +450,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
     delete.(model, Array(e_ptrans)[.!δ_qxs])
     delete.(model, Array(cvcif)[.!δ_qxs])
     delete.(model, Array(cvfob)[.!δ_qxs])
+    delete.(model, Array(e_σ_qxs)[.!δ_qxs])
+    
 
     # Margins not allowed
 
