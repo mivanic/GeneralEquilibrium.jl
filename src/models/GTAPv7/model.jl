@@ -220,6 +220,10 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             0 <= vst[marg, reg]
             0 <= vtwr[marg, comm, reg, reg]
             0 <= maks[comm, acts, reg]
+
+            # Shares (helpers to calibrate)
+            0 <= σ_vp[com, reg]
+            0 <= σ_vdp[com, reg]
         end
     )
 
@@ -416,6 +420,10 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             sf_α_qga[r=reg], log(sum(α_qga[:,r])) == log(ϵ_qga[r])
             sf_α_qfa[a=acts, r=reg], log(sum(α_qfa[:,a,r])) == log(ϵ_qfa[a,r])
             sf_save, log.(σsave .+ σyp .+ σyg) .== log(1)
+
+            # Shares (helpers)
+            e_σ_vp[c=comm, r = reg], σ_vp[c,r] * sum(ppd[:,r].*qpd[:,r] .+ ppm[:,r].*qpm[:,r]) == ppd[c,r] .* qpd[c,r] + ppm[c,r].*qpm[c,r]
+            e_σ_vdp[c=comm, r = reg], σ_vdp[c,r] * (ppd[c,r].*qpd[c,r] .+ ppm[c,r].*qpm[c,r]) == ppd[c,r] .* qpd[c,r]
         end
     )
 
