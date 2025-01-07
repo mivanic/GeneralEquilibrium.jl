@@ -174,6 +174,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             1e-8 <= σyg[reg] <= 1
             -1 <= σsave[reg] <= 1
             1e-8 <= α_qga[comm, reg] <= 1
+            1e-8 <= ϵ_qga[comm, reg]
             1e-8 <= γ_qga[reg]
             1e-8 <= α_qia[comm, reg] <= 1
             1e-8 <= γ_qia[reg]
@@ -411,6 +412,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             sf_α_qgdqgm[c=comm, r=reg], log(sum(α_qgdqgm[:, c, r])) == log(ϵ_qgdqgm[c, r])
             sf_α_qidqim[c=comm, r=reg], log(sum(α_qidqim[:, c, r])) == log(ϵ_qidqim[c, r])
             sf_α_qia[r=reg], log(sum(α_qia[:, r])) == log(ϵ_qia[r])
+            sf_α_qga[r=reg], log(sum(α_qga[:,r])) == log(ϵ_qga[r])
             sf_save, log.(σsave .+ σyp .+ σyg) .== log(1)
         end
     )
