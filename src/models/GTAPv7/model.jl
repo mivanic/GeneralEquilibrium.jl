@@ -224,6 +224,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             # Shares (helpers to calibrate)
             0 <= σ_vp[comm, reg]
             0 <= σ_vdp[comm, reg]
+            0 <= σ_vg[comm, reg]
+            0 <= σ_vdg[comm, reg]
             0 <= σ_qxs[comm, reg, reg]
         end
     )
@@ -424,6 +426,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             # Shares (helpers)
             e_σ_vp[c=comm, r = reg], σ_vp[c,r] * sum(ppd[:,r].*qpd[:,r] .+ ppm[:,r].*qpm[:,r]) == ppd[c,r] .* qpd[c,r] + ppm[c,r].*qpm[c,r]
             e_σ_vdp[c=comm, r = reg], σ_vdp[c,r] * (ppd[c,r].*qpd[c,r] .+ ppm[c,r].*qpm[c,r]) == ppd[c,r] .* qpd[c,r]
+            e_σ_vg[c=comm, r = reg], σ_vg[c,r] * sum(pgd[:,r].*qgd[:,r] .+ pgm[:,r].*qgm[:,r]) == pgd[c,r] .* qgd[c,r] + pgm[c,r].*qgm[c,r]
+            e_σ_vdg[c=comm, r = reg], σ_vdg[c,r] * (pgd[c,r].*qgd[c,r] .+ pgm[c,r].*qgm[c,r]) == pgd[c,r] .* qgd[c,r]
             e_σ_qxs[c=comm, s = reg, d = reg], σ_qxs[c,s,d] * sum(Vector(pcif[c,:,d] .* qxs[c,:,d])[δ_qxs[c,:,d]])== pcif[c,s,d] .* qxs[c,s,d]
         end
     )
