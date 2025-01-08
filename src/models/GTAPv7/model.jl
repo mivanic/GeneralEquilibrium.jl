@@ -505,12 +505,22 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
 
     # Fix fixed values and delete missing ones
     for fv ∈ keys(fixed)
-        for fvi ∈ CartesianIndices(fixed[fv])
-            if fixed[fv][fvi] && is_valid(model, model[Symbol(fv)][fvi])
-                if isnan(data[fv][fvi])
-                    delete(model, model[Symbol(fv)][fvi])
+        if size(fixed[fv]) == ()
+            if fixed[fv] && is_valid(model, model[Symbol(fv)])
+                if isnan(data[fv])
+                    delete(model, model[Symbol(fv)])
                 else
-                    fix(model[Symbol(fv)][fvi], data[fv][fvi]; force=true)
+                    fix(model[Symbol(fv)], data[fv]; force=true)
+                end
+            end
+        else
+            for fvi ∈ CartesianIndices(fixed[fv])
+                if fixed[fv][fvi] && is_valid(model, model[Symbol(fv)][fvi])
+                    if isnan(data[fv][fvi])
+                        delete(model, model[Symbol(fv)][fvi])
+                    else
+                        fix(model[Symbol(fv)][fvi], data[fv][fvi]; force=true)
+                    end
                 end
             end
         end
