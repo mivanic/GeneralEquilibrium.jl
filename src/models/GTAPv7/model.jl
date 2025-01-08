@@ -201,6 +201,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             1e-8 <= γ_qes2[endws, reg]
             1e-8 <= ϵ_qes2[endws, reg]
             1e-8 <= α_qinv[reg] <= 1
+            0 <= ϵ_qinv
 
             0 <= δ[reg] <= 1
             0 <= ρ[reg] <= 1
@@ -433,6 +434,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             sf_α_qga[r=reg], log(sum(α_qga[:, r])) == log(ϵ_qga[r])
             sf_α_qfa[a=acts, r=reg], log(sum(α_qfa[:, a, r])) == log(ϵ_qfa[a, r])
             sf_α_qintva[a=acts, r=reg], log(sum(α_qintva[["int", "va"], a, r])) == log(ϵ_qintva[a, r])
+            sf_α_qinv, log(sum(α_qinv)) == log(ϵ_qinv)
             sf_save, log.(σsave .+ σyp .+ σyg) .== log(1)
 
             # Shares (helpers)
