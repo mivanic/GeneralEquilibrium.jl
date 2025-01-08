@@ -157,6 +157,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
 
             # Soft parameters
             1e-8 <= α_qintva[["int", "va"], acts, reg] <= 1
+            1e-8 <= ϵ_qintva[acts, reg]
             1e-8 <= γ_qintva[acts, reg]
             1e-8 <= α_qfa[comm, acts, reg] <= 1
             1e-8 <= ϵ_qfa[acts, reg]
@@ -230,6 +231,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             0 <= σ_vdi[comm, reg]
             0 <= σ_vf[comm, acts, reg]
             0 <= σ_vdf[comm, acts, reg]
+            0 <= σ_vff[e,a,r]
+            0 <= σ_vif[a,r]
             0 <= σ_qxs[comm, reg, reg]
         end
     )
@@ -246,6 +249,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
     delete.(model, Array(α_qfe)[.!δ_evfp])
     delete.(model, Array(evos)[.!δ_evfp])
     delete.(model, Array(evfp)[.!δ_evfp])
+    delete.(model, Array(σ_vff)[.!δ_evfp])
 
     # Remove maks when there is no output produced
     delete.(model, Array(maks)[.!δ_maks])
@@ -425,6 +429,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             sf_α_qia[r=reg], log(sum(α_qia[:, r])) == log(ϵ_qia[r])
             sf_α_qga[r=reg], log(sum(α_qga[:,r])) == log(ϵ_qga[r])
             sf_α_qfa[a=acts, r=reg], log(sum(α_qfa[:,a,r])) == log(ϵ_qfa[a,r])
+            sf_α_qintva[a=acts, r=reg], log(sum(α_qintva[["int", "va"],a,r])) == log(ϵ_qintva[a,r])
             sf_save, log.(σsave .+ σyp .+ σyg) .== log(1)
 
             # Shares (helpers)
@@ -436,6 +441,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             e_σ_vdi[c=comm, r = reg], σ_vdi[c,r] * (pid[c,r].*qid[c,r] .+ pim[c,r].*qim[c,r]) == pid[c,r] .* qid[c,r]
             e_σ_vf[c=comm, a = acts, r = reg], σ_vf[c,a,r] * sum(pfd[:,a,r].*qfd[:,a,r] .+ pfm[:,a,r].*qfm[:,a,r]) == pfd[c,a,r] .* qfd[c,a,r] + pfm[c,a,r].*qfm[c,a,r]
             e_σ_vdf[c=comm, a = acts, r = reg], σ_vdf[c,a,r] * (pfd[c,a,r].*qfd[c,a,r] .+ pfm[c,a,r].*qfm[c,a,r]) == pfd[c,a,r] .* qfd[c,a,r]
+            e_σ_vif[a = acts, r = reg], σ_vif[a,r] * (pva[a,r]*qva[a,r]+pint[a,r]*qint[a,r]) == pint[a,r]*qint[a,r] 
+            e_σ_vff[e=endw, a = acts, r = reg], σ_vff[e,a,r] * sum(pfe[:,a,r].*qfe[:,a,r]) == pfe[e,a,r].*qfe[e,a,r]
             e_σ_qxs[c=comm, s = reg, d = reg], σ_qxs[c,s,d] * sum(Vector(pcif[c,:,d] .* qxs[c,:,d])[δ_qxs[c,:,d]])== pcif[c,s,d] .* qxs[c,s,d]
         end
     )
@@ -450,7 +457,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
     delete.(model, Array(e_pes)[.!δ_evfp])
     delete.(model, Array(e_qes1)[.!δ_evfp[endwm, :, :]])
     delete.(model, Array(e_qes3)[.!δ_evfp[endwf, :, :]])
-
+    delete.(model, Array(e_σ_vff)[.!δ_evfp])
+    
     # Outputs not produced
     delete.(model, Array(cmaks)[.!δ_maks])
     delete.(model, Array(e_ps)[.!δ_maks])
