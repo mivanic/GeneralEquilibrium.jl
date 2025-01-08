@@ -226,6 +226,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             0 <= σ_vdp[comm, reg]
             0 <= σ_vg[comm, reg]
             0 <= σ_vdg[comm, reg]
+            0 <= σ_vi[comm, reg]
+            0 <= σ_vdi[comm, reg]
             0 <= σ_qxs[comm, reg, reg]
         end
     )
@@ -428,6 +430,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             e_σ_vdp[c=comm, r = reg], σ_vdp[c,r] * (ppd[c,r].*qpd[c,r] .+ ppm[c,r].*qpm[c,r]) == ppd[c,r] .* qpd[c,r]
             e_σ_vg[c=comm, r = reg], σ_vg[c,r] * sum(pgd[:,r].*qgd[:,r] .+ pgm[:,r].*qgm[:,r]) == pgd[c,r] .* qgd[c,r] + pgm[c,r].*qgm[c,r]
             e_σ_vdg[c=comm, r = reg], σ_vdg[c,r] * (pgd[c,r].*qgd[c,r] .+ pgm[c,r].*qgm[c,r]) == pgd[c,r] .* qgd[c,r]
+            e_σ_vi[c=comm, r = reg], σ_vi[c,r] * sum(pid[:,r].*qid[:,r] .+ pim[:,r].*qim[:,r]) == pid[c,r] .* qid[c,r] + pim[c,r].*qim[c,r]
+            e_σ_vdi[c=comm, r = reg], σ_vdi[c,r] * (pid[c,r].*qid[c,r] .+ pim[c,r].*qim[c,r]) == pid[c,r] .* qid[c,r]
             e_σ_qxs[c=comm, s = reg, d = reg], σ_qxs[c,s,d] * sum(Vector(pcif[c,:,d] .* qxs[c,:,d])[δ_qxs[c,:,d]])== pcif[c,s,d] .* qxs[c,s,d]
         end
     )
