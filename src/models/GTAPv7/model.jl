@@ -235,6 +235,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             0 <= σ_vif[acts, reg]
             0 <= σ_vtwr[marg, comm, reg, reg]
             0 <= σ_qxs[comm, reg, reg]
+            0 <= σ_qinv[reg]
         end
     )
 
@@ -447,6 +448,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             e_σ_vff[e=endw, a=acts, r=reg], σ_vff[e, a, r] * sum(Vector(pfe[:, a, r] .* qfe[:, a, r])[δ_evfp[:, a, r]]) == pfe[e, a, r] .* qfe[e, a, r]
             e_σ_vtwr[m=marg, c=comm, s=reg, d=reg], σ_vtwr[m,c,s,d] * pcif[c,s,d] * qxs[c,s,d] == pt[m] * qtmfsd[m, c, s, d] 
             e_σ_qxs[c=comm, s=reg, d=reg], σ_qxs[c, s, d] * sum(Vector(pcif[c, :, d] .* qxs[c, :, d])[δ_qxs[c, :, d]]) == pcif[c, s, d] .* qxs[c, s, d]
+            e_σ_qinv[r = reg], σ_qinv[r] * sum(psave .* qsave) == psave[r] * qsave[r]
         end
     )
 
