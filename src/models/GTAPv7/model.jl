@@ -442,7 +442,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             e_σ_vf[c=comm, a=acts, r=reg], σ_vf[c, a, r] * sum(pfd[:, a, r] .* qfd[:, a, r] .+ pfm[:, a, r] .* qfm[:, a, r]) == pfd[c, a, r] .* qfd[c, a, r] + pfm[c, a, r] .* qfm[c, a, r]
             e_σ_vdf[c=comm, a=acts, r=reg], σ_vdf[c, a, r] * (pfd[c, a, r] .* qfd[c, a, r] .+ pfm[c, a, r] .* qfm[c, a, r]) == pfd[c, a, r] .* qfd[c, a, r]
             e_σ_vif[a=acts, r=reg], σ_vif[a, r] * (pva[a, r] * qva[a, r] + pint[a, r] * qint[a, r]) == pint[a, r] * qint[a, r]
-            e_σ_vff[e=endw, a=acts, r=reg], σ_vff[e, a, r] * sum(pfe[:, a, r] .* qfe[:, a, r]) == pfe[e, a, r] .* qfe[e, a, r]
+            e_σ_vff[e=endw, a=acts, r=reg], σ_vff[e, a, r] * sum(Vector(pfe[:, a, r] .* qfe[:, a, r])[δ_evfp[:, a, r]]) == pfe[e, a, r] .* qfe[e, a, r]
             e_σ_qxs[c=comm, s=reg, d=reg], σ_qxs[c, s, d] * sum(Vector(pcif[c, :, d] .* qxs[c, :, d])[δ_qxs[c, :, d]]) == pcif[c, s, d] .* qxs[c, s, d]
         end
     )
