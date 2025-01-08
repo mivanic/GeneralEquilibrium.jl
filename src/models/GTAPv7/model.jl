@@ -228,6 +228,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             0 <= σ_vdg[comm, reg]
             0 <= σ_vi[comm, reg]
             0 <= σ_vdi[comm, reg]
+            0 <= σ_vf[comm, acts, reg]
+            0 <= σ_vdf[comm, acts, reg]
             0 <= σ_qxs[comm, reg, reg]
         end
     )
@@ -432,6 +434,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             e_σ_vdg[c=comm, r = reg], σ_vdg[c,r] * (pgd[c,r].*qgd[c,r] .+ pgm[c,r].*qgm[c,r]) == pgd[c,r] .* qgd[c,r]
             e_σ_vi[c=comm, r = reg], σ_vi[c,r] * sum(pid[:,r].*qid[:,r] .+ pim[:,r].*qim[:,r]) == pid[c,r] .* qid[c,r] + pim[c,r].*qim[c,r]
             e_σ_vdi[c=comm, r = reg], σ_vdi[c,r] * (pid[c,r].*qid[c,r] .+ pim[c,r].*qim[c,r]) == pid[c,r] .* qid[c,r]
+            e_σ_vf[c=comm, a = acts, r = reg], σ_vf[c,a,r] * sum(pfd[:,a,r].*qfd[:,a,r] .+ pfm[:,a,r].*qfm[:,a,r]) == pfd[c,a,r] .* qfd[c,a,r] + pfm[c,a,r].*qfm[c,a,r]
+            e_σ_vdf[c=comm, a = acts, r = reg], σ_vdf[c,a,r] * (pfd[c,a,r].*qfd[c,a,r] .+ pfm[c,a,r].*qfm[c,a,r]) == pfd[c,a,r] .* qfd[c,a,r]
             e_σ_qxs[c=comm, s = reg, d = reg], σ_qxs[c,s,d] * sum(Vector(pcif[c,:,d] .* qxs[c,:,d])[δ_qxs[c,:,d]])== pcif[c,s,d] .* qxs[c,s,d]
         end
     )
