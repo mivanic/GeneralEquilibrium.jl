@@ -233,6 +233,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             0 <= σ_vdf[comm, acts, reg]
             0 <= σ_vff[endw, acts, reg]
             0 <= σ_vif[acts, reg]
+            0 <= σ_vtwr[marg, comm, reg, reg]
             0 <= σ_qxs[comm, reg, reg]
         end
     )
@@ -271,6 +272,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
 
     # Remove margins when no margins are allowed
     delete.(model, Array(qtmfsd)[.!δ_vtwr])
+    delete.(model, Array(σ_vtwr)[.!δ_vtwr])
     delete.(model, Array(α_qtmfsd)[.!δ_vtwr])
     delete.(model, Array(vtwr)[.!δ_vtwr])
 
@@ -443,6 +445,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             e_σ_vdf[c=comm, a=acts, r=reg], σ_vdf[c, a, r] * (pfd[c, a, r] .* qfd[c, a, r] .+ pfm[c, a, r] .* qfm[c, a, r]) == pfd[c, a, r] .* qfd[c, a, r]
             e_σ_vif[a=acts, r=reg], σ_vif[a, r] * (pva[a, r] * qva[a, r] + pint[a, r] * qint[a, r]) == pint[a, r] * qint[a, r]
             e_σ_vff[e=endw, a=acts, r=reg], σ_vff[e, a, r] * sum(Vector(pfe[:, a, r] .* qfe[:, a, r])[δ_evfp[:, a, r]]) == pfe[e, a, r] .* qfe[e, a, r]
+            e_σ_vtwr[m=marg, c=comm, s=reg, d=reg], σ_vtwr[m,c,s,d] * pcif[c,s,d] * qxs[c,s,d] == pt[m] * qtmfsd[m, c, s, d] 
             e_σ_qxs[c=comm, s=reg, d=reg], σ_qxs[c, s, d] * sum(Vector(pcif[c, :, d] .* qxs[c, :, d])[δ_qxs[c, :, d]]) == pcif[c, s, d] .* qxs[c, s, d]
         end
     )
@@ -476,6 +479,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
     # Margins not allowed
 
     delete.(model, Array(e_qtmfsd)[.!δ_vtwr])
+    delete.(model, Array(e_σ_vtwr)[.!δ_vtwr])
     delete.(model, Array(e_ptrans)[δ_qxs.&&.!δ_vtwr_sum])
 
     free_variables = filter((x) -> is_fixed.(x) == false, JuMP.all_variables(model))
