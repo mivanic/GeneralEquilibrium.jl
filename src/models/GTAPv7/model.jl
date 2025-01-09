@@ -200,7 +200,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             1e-8 <= α_qes2[endws, acts, reg] <= 1
             1e-8 <= γ_qes2[endws, reg]
             1e-8 <= ϵ_qes2[endws, reg]
-            1e-8 <= α_qinv[reg] <= 1
+            -1 <= α_qinv[reg] <= 1
             0 <= ϵ_qinv
 
             0 <= δ[reg] <= 1
