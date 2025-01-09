@@ -395,7 +395,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             # Investment is a fixed share of global investment
             #e_qinv, log.(qinv) .== log.(Vector(α_qinv) .* globalcgds)
             #e_qinv, log.(qinv) .== log.(Vector(α_qinv) .* globalcgds .+ δ .* kb)
-            e_qinv, qinv .- δ .* kb .== Vector(α_qinv) .* globalcgds
+            e_qinv, log.(qinv) .== log.(Vector(α_qinv) .* globalcgds .+ δ .* kb)
 
             e_pcgdswld, log(pcgdswld) == log(sum(pinv .* qinv) / sum(qinv))
 
@@ -404,7 +404,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
 
             # Capital accumulation
             e_kb[r=reg], log(ρ[r] * pinv[r] * kb[r]) == log(sum(qe[endwc, r] .* pe[endwc, r]))
-            e_ke, log.(ke) .== log.(qinv .+ (1 .- δ .* kb))
+            e_ke, log.(ke) .== log.(qinv .+ (1 .- δ) .* kb)
 
             # Values
             cvdfp, log.(vdfp) .== log.(pfd .* qfd)
