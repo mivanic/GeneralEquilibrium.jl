@@ -229,7 +229,7 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
     δ = hData["vdep"] ./ hData["vkb"]
     ρ = mapslices(sum, hData["evos"][endwc, :, :], dims=[1, 2])[1, 1, :] ./ hData["vkb"]
 
-    α_qinv = (qinv .- δ * kb) ./ fill(globalcgds, size(qinv, 1))
+    α_qinv = (qinv .- δ .* kb) ./ fill(globalcgds, size(qinv, 1))
 
 
     # ϵs
