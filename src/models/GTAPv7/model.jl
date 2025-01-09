@@ -394,7 +394,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
 
             # Investment is a fixed share of global investment
             #e_qinv, log.(qinv) .== log.(Vector(α_qinv) .* globalcgds)
-            e_qinv, log.(qinv .- δ .* kb) .== log.(Vector(α_qinv) .* globalcgds)
+            e_qinv, log.(qinv) .== log.(Vector(α_qinv) .* globalcgds .+ δ .* kb)
 
             e_pcgdswld, log(pcgdswld) == log(sum(pinv .* qinv) / sum(qinv))
 

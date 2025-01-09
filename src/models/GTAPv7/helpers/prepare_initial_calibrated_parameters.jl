@@ -8,7 +8,7 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
 
 
     # Read all data
-    (; pint, pva, qint, qva, qo, pfa, qfa, pfe, qfe, pfm, qfm, pfd, qfd, qca, ps, pca, qc, y, yp, yg, ppa, qpa, qpd, qpm, ppd, ppm, pgd, qgd, pgm, qgm, pga, qga, pgov, pid, qid, pim, qim, pia, qia, pinv, qinv, globalcgds, qxs, pmds, qms, qtmfsd, qtm, pds, qst, pes, qes, qe, u, pop) = NamedTuple(Dict(Symbol(k) => data[k] for k ∈ keys(data)))
+    (; pint, pva, qint, qva, qo, pfa, qfa, pfe, qfe, pfm, qfm, pfd, qfd, qca, ps, pca, qc, y, yp, yg, ppa, qpa, qpd, qpm, ppd, ppm, pgd, qgd, pgm, qgm, pga, qga, pgov, pid, qid, pim, qim, pia, qia, pinv, qinv, globalcgds, qxs, pmds, qms, qtmfsd, qtm, pds, qst, pes, qes, qe, u, pop, kb) = NamedTuple(Dict(Symbol(k) => data[k] for k ∈ keys(data)))
 
     # Helper function
     function ρ(σ)
@@ -224,11 +224,12 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
     # Vector(qes["land", :, "eu"])[Vector(α_qes2["land", :, "eu"]).!=0] 
     # Vector(demand_ces(qe["land", "eu"], Vector(pes["land", :, "eu"])[Vector(α_qes2["land", :, "eu"]).!=0], Vector(α_qes2["land", :, "eu"])[Vector(α_qes2["land", :, "eu"]).!=0], etrae["land", "eu"], γ_qes2[3, 2]))
 
-    α_qinv = qinv ./ fill(globalcgds, size(qinv, 1))
-
+    
 
     δ = hData["vdep"] ./ hData["vkb"]
     ρ = mapslices(sum, hData["evos"][endwc, :, :], dims=[1, 2])[1, 1, :] ./ hData["vkb"]
+
+    α_qinv = (qinv .- δ * kb) ./ fill(globalcgds, size(qinv, 1))
 
 
     # ϵs
