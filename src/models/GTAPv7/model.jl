@@ -530,7 +530,6 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
     set_attribute(model, "max_iter", max_iter)
     set_attribute(model, "constr_viol_tol", constr_viol_tol)
     set_attribute(model, "bound_push", bound_push)
-    set_attribute(model, "halt_on_ampl_error", "yes")
 
     # # Summary of constraints and free variables
     constraints = all_constraints(model; include_variable_in_set_constraints=false)
