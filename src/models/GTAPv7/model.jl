@@ -70,6 +70,8 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             # Private consumption        
             y_min <= yp[reg] <= y_max
             q_min <= u[reg] <= q_max
+            0 <= Φ[reg] <= 10
+            0 <= Φᴾ[reg] <= 10
             p_min <= ppa[comm, reg] <= p_max
             q_min <= qpa[comm, reg] <= q_max
             p_min <= ppd[comm, reg] <= p_max
@@ -278,9 +280,6 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
     delete.(model, Array(α_qtmfsd)[.!δ_vtwr])
     delete.(model, Array(vtwr)[.!δ_vtwr])
 
-
-    #(;pcif,qo,pcgdswld,tpd,pfd,globalcgds,pint,pfm,qxs,pt,qfd,pga,qtm,tid,ppa,y,pgov,pgd,qid,pmds,qpa,qes,qva,tinc,peb,qpm,qst,psave,txs,qsave,tfd,pfob,qesf,pms,tgm,pca,qfe,tm,qe,ps,pfa,pid,pva,pe,qc,qinv,tms,to,tx,pgm,pfe,qga,walras_dem,u,qpd,pia,walras_sup,qim,po,ppd,qtmfsd,pim,tgd,pes,qfa,tfe,ppm,qint,qds,yp,qca,tim,pinv,tpm,qgm,fincome,pds,qia,qgd,qfm,ptrans,tfm,yg,qms) = NamedTuple(data)
-
     # All model equations
     @constraints(model,
         begin
@@ -327,15 +326,17 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             )
 
             # Household Income
-            e_yp, log.(yp) .== log.(y .* Vector(σyp))
+            e_yp, log.(yp) .== log.(y .* Vector(σyp) .* e_Φ ./ e_Φᴾ)
 
             # Household consumption
             e_qpa[r=reg], log.([Vector(qpa[:, r] ./ pop[r]); 1]) .== log.(cde(Vector(1 .- subpar[:, r]), Vector(β_qpa[:, r]), Vector(incpar[:, r]), u[r], Vector(ppa[:, r]), yp[r] / pop[r]))
+            e_Φᴾ[r=reg], Φᴾ[r] == sum(qpa[:, r] .* ppa[:, r] .* incpar[:, r]) / yp[r]
+            e_Φ[r=reg], Φ[r] == 1 / (σyp[r] / Φᴾ[r] + σyg + (1 - σyp - σyg))
             e_qpdqpm[c=comm, r=reg], log.([qpd[c, r], qpm[c, r]]) .== log.(demand_ces(qpa[c, r], [ppd[c, r], ppm[c, r]], α_qpdqpm[:, c, r], esubd[c, r], γ_qpdqpm[c, r]))
             e_ppa, log.(qpa .* ppa) .== log.(ppd .* qpd .+ ppm .* qpm)
 
             # Government Income
-            e_yg, log.(yg) .== log.(y .* Vector(σyg))
+            e_yg, log.(yg) .== log.(y .* Vector(σyg) .* Φ)
 
             # Government expenditure
             e_qga[r=reg], log.(pga[:, r] .* qga[:, r]) .== log.(yg[r] .* Vector(α_qga[:, r])) ##This one
@@ -344,7 +345,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             e_pga, log.(qga .* pga) .== log.(pgd .* qgd .+ pgm .* qgm)
 
             # Saving
-            e_qsave, log.(y) .== log.(yp .+ yg .+ psave .* qsave)
+            e_qsave, log.(y) .== log.(yp .+ yg .+ psave .* qsave .* Φ)
 
             # Investment consumption
             e_qia[r=reg], log.(qia[:, r]) .== log.(demand_ces(qinv[r], pia[:, r], Vector(α_qia[:, r]), 0, γ_qia[r]))
