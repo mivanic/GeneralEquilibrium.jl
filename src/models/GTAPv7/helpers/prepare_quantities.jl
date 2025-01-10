@@ -165,8 +165,8 @@ function prepare_quantities(; data, parameters, sets, hData)
         :vmgp => hData["vmgp"],
         :vdip => hData["vdip"],
         :vmip => hData["vmip"],
-        Φᴾ => Φᴾ,
-        Φ => Φ
+        :Φᴾ => Φᴾ,
+        :Φ => Φ
     )
 
     return merge(data, Dict(String(k)=>quantities[k] for k ∈ keys(quantities)))
