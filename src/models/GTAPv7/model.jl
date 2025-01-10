@@ -326,7 +326,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             )
 
             # Household Income
-            e_yp, log.(yp) .== log.(y .* Vector(σyp) .* e_Φ ./ e_Φᴾ)
+            e_yp, log.(yp) .== log.(y .* Vector(σyp) .* Φ ./ Φᴾ)
 
             # Household consumption
             e_qpa[r=reg], log.([Vector(qpa[:, r] ./ pop[r]); 1]) .== log.(cde(Vector(1 .- subpar[:, r]), Vector(β_qpa[:, r]), Vector(incpar[:, r]), u[r], Vector(ppa[:, r]), yp[r] / pop[r]))
