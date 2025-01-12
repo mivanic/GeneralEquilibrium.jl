@@ -398,7 +398,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             #e_qinv, log.(qinv) .== log.(Vector(α_qinv) .* globalcgds .+ δ .* kb)
             e_qinv, log.(qinv) .== log.(Vector(α_qinv) .* globalcgds .+ δ .* kb)
 
-            e_pcgdswld, log(pcgdswld) == log(sum(pinv .* qinv) / sum(qinv))
+            e_pcgdswld, log(pcgdswld) == log(sum(pinv .* (qinv .- δ .* kb )) / sum(qinv .- δ .* kb ))
 
             e_walras_sup, log(walras_sup) == log(pcgdswld * globalcgds)
             e_walras_dem, log(walras_dem) == log(sum(psave .* qsave))
