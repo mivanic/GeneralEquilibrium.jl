@@ -8,7 +8,7 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
 
 
     # Read all data
-    (; pint, pva, qint, qva, qo, pfa, qfa, pfe, qfe, pfm, qfm, pfd, qfd, qca, ps, pca, qc, y, yp, yg, ppa, qpa, qpd, qpm, ppd, ppm, pgd, qgd, pgm, qgm, pga, qga, pgov, pid, qid, pim, qim, pia, qia, pinv, qinv, globalcgds, qxs, pmds, qms, qtmfsd, qtm, pds, qst, pes, qes, qe, u, pop, kb) = NamedTuple(Dict(Symbol(k) => data[k] for k ∈ keys(data)))
+    (; pint, pva, qint, qva, qo, pfa, qfa, pfe, qfe, pfm, qfm, pfd, qfd, qca, ps, pca, qc, y, yp, yg, ppa, qpa, qpd, qpm, ppd, ppm, pgd, qgd, pgm, qgm, pga, qga, pgov, pid, qid, pim, qim, pia, qia, pinv, qinv, globalcgds, qxs, pmds, qms, qtmfsd, qtm, pds, qst, pes, qes, qe, up, pop, kb) = NamedTuple(Dict(Symbol(k) => data[k] for k ∈ keys(data)))
 
     # Helper function
     function ρ(σ)
@@ -302,7 +302,7 @@ function prepare_initial_calibrated_parameters(; data, sets, parameters, hData)
         :ρ => ρ
     )
 
-    new_data = Dict(:u => NamedArray(value.(u2.data), reg))
+    new_data = Dict(:up => NamedArray(value.(u2.data), reg))
 
     return (
         parameters=parameters,

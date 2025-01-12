@@ -67,9 +67,13 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             y_min <= fincome[reg] <= y_max
             y_min <= y[reg] <= y_max
 
+            q_min <= u[reg] <= q_max
+            q_min <= ug[reg] <= q_max
+            q_min <= us[reg] <= q_max
+
             # Private consumption        
             y_min <= yp[reg] <= y_max
-            q_min <= u[reg] <= q_max
+            q_min <= up[reg] <= q_max
             0 <= Φ[reg] <= 10
             0 <= Φᴾ[reg] <= 10
             p_min <= ppa[comm, reg] <= p_max
@@ -325,11 +329,17 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
                 sum(Array(qxs[:, :, r] .* pcif[:, :, r] .* (tms[:, :, r] .- 1))[δ_qxs[:, :, r]])
             )
 
+
+            # Utility
+            e_ug, ug .== yg ./ pop ./ pgov
+            e_us, us .== qsave .* psave ./ pop
+            e_u, u .== up.^σyp .* ug.^σyg .* us.^(1 .-σyp .- σ yg)
+
             # Household Income
             e_yp, log.(yp) .== log.(y .* Vector(σyp) .* Φ ./ Φᴾ)
 
             # Household consumption
-            e_qpa[r=reg], log.([Vector(qpa[:, r] ./ pop[r]); 1]) .== log.(cde(Vector(1 .- subpar[:, r]), Vector(β_qpa[:, r]), Vector(incpar[:, r]), u[r], Vector(ppa[:, r]), yp[r] / pop[r]))
+            e_qpa[r=reg], log.([Vector(qpa[:, r] ./ pop[r]); 1]) .== log.(cde(Vector(1 .- subpar[:, r]), Vector(β_qpa[:, r]), Vector(incpar[:, r]), up[r], Vector(ppa[:, r]), yp[r] / pop[r]))
             e_Φᴾ[r=reg], Φᴾ[r] == sum(qpa[:, r] .* ppa[:, r] .* Vector(incpar[:, r])) / yp[r]
             e_Φ[r=reg], Φ[r] == 1 / (σyp[r] / Φᴾ[r] + σyg[r] + (1 - σyp[r] - σyg[r]))
             e_qpdqpm[c=comm, r=reg], log.([qpd[c, r], qpm[c, r]]) .== log.(demand_ces(qpa[c, r], [ppd[c, r], ppm[c, r]], α_qpdqpm[:, c, r], esubd[c, r], γ_qpdqpm[c, r]))
