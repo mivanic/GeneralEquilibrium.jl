@@ -58,6 +58,7 @@ function prepare_initial_values(; sets, hData, hParameters)
     pms = NamedArray(ones(length(comm), length(reg)), (comm, reg))
     pcgdswld = 1
     psave = NamedArray(ones(length(reg)), (reg))
+    u = NamedArray(ones(length(reg)), (reg))
     up = NamedArray(ones(length(reg)), (reg))
     ug = NamedArray(ones(length(reg)), (reg))
     us = NamedArray(ones(length(reg)), (reg))
@@ -101,6 +102,9 @@ function prepare_initial_values(; sets, hData, hParameters)
         "pcgdswld" => pcgdswld,
         "psave" => psave,
         "u" => u,
+        "up" => up,
+        "ug" => ug,
+        "us" => us,
         "pmds" => pmds,
         "pcif" => pcif,
         "pfob" => pfob,
