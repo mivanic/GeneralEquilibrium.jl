@@ -332,7 +332,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
 
             # Utility
             e_ug, ug .== yg ./ pop ./ pgov
-            e_us, us .== qsave .* psave ./ pop
+            e_us, us .== qsave ./ psave ./ pop
             e_u, u .== up.^σyp .* ug.^σyg .* us.^(1 .-σyp .- σyg)
 
             # Household Income
