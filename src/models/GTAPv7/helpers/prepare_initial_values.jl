@@ -75,7 +75,13 @@ function prepare_initial_values(; sets, hData, hParameters)
 
     pop = hData["pop"]
 
+    ppriv = NamedArray(ones(length(reg)), (reg))
+    pfactor = NamedArray(ones(length(reg)), (reg))
+
+
     return (data = Dict(
+        "ppriv" => ppriv,
+        "pfactor" => pfactor,
         "pint" => pint,
         "pva" => pva,
         "po" => po,

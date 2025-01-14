@@ -62,6 +62,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             # Endowments
             p_min <= peb[endw, acts, reg] <= p_max
             q_min <= qes[endw, acts, reg] <= q_max
+            p_min <= pfactor[reg] <= p_max
 
             # Income
             y_min <= fincome[reg] <= y_max
@@ -82,6 +83,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             q_min <= qpd[comm, reg] <= q_max
             p_min <= ppm[comm, reg] <= p_max
             q_min <= qpm[comm, reg] <= q_max
+            p_min <= ppriv[reg] <= p_max
 
             # Government consumption
             y_min <= yg[reg] <= y_max
@@ -309,6 +311,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             # Endowments
             e_peb[e=endw, a=acts, r=reg], log.(qfe[e, a, r]) == log.(qes[e, a, r])
             e_pfe[e=endw, a=acts, r=reg], log.(pfe[e, a, r]) == log.(peb[e, a, r] .* tfe[e, a, r])
+            e_pfactor[r=reg], log(pfactor[r] * sum(qfe[:,:,r])) == log(sum(Array(qfe[:,:,r].*peb[:,:,r])[δ_evfp[:, :, r]]))
 
             # Income
             e_fincome[r=reg], log.(fincome[r]) == log.(sum(Array(peb[:, :, r] .* qes[:, :, r])[δ_evfp[:, :, r]]) .- δ[r] .* pinv[r] .* kb[r])
@@ -344,6 +347,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             e_Φ[r=reg], Φ[r] == 1 / (σyp[r] / Φᴾ[r] + σyg[r] + (1 - σyp[r] - σyg[r]))
             e_qpdqpm[c=comm, r=reg], log.([qpd[c, r], qpm[c, r]]) .== log.(demand_ces(qpa[c, r], [ppd[c, r], ppm[c, r]], α_qpdqpm[:, c, r], esubd[c, r], γ_qpdqpm[c, r]))
             e_ppa, log.(qpa .* ppa) .== log.(ppd .* qpd .+ ppm .* qpm)
+            e_ppriv[r = reg], log(ppriv[r] * sum(qpa[:,r])) == log(sum(ppa[:,r].*qpa[:,r]))
 
             # Government Income
             e_yg, log.(yg) .== log.(y .* Vector(σyg) .* Φ)
