@@ -1,4 +1,4 @@
-function calibrate(; start_data, data)
+function calibrate(; start_data, data, sets=sets,  start_parameters, fixed=fixed, max_iter=100, constr_viol_tol=1e-8)
 
     calibrate_start = deepcopy(data)
     # CAL-I
@@ -94,7 +94,7 @@ function calibrate(; start_data, data)
     fixed["vdpp"][1, 1] = true
 
     @time begin
-        (; data, parameters) = GTAPv7.model(sets=sets, data=calibrate_start, parameters=start_parameters, fixed=fixed, max_iter=100, constr_viol_tol=1e-8)
+        (; data) = GTAPv7.model(sets=sets, data=data, parameters=start_parameters, fixed=fixed, max_iter=max_iter, constr_viol_tol=constr_viol_tol)
     end
 
     calibrated_data = deepcopy(data)
