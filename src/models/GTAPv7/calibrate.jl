@@ -1,5 +1,8 @@
 function calibrate(; start_data, data, sets=sets,  start_parameters, fixed=fixed, max_iter=100, constr_viol_tol=1e-8)
 
+    # We do not want to mess with user's fixed dictionary
+    fixed = deepcopy(fixed)
+
     calibrate_start = deepcopy(data)
     # CAL-I
     fixed["α_qxs"] .= false
