@@ -311,7 +311,7 @@ function model(; sets, data, parameters, fixed, max_iter=50, constr_viol_tol=1e-
             # Endowments
             e_peb[e=endw, a=acts, r=reg], log.(qfe[e, a, r]) == log.(qes[e, a, r])
             e_pfe[e=endw, a=acts, r=reg], log.(pfe[e, a, r]) == log.(peb[e, a, r] .* tfe[e, a, r])
-            e_pfactor[r=reg], log(pfactor[r] * sum(qfe[:,:,r])) == log(sum(Array(qfe[:,:,r].*peb[:,:,r])[δ_evfp[:, :, r]]))
+            e_pfactor[r=reg], log(pfactor[r] * sum(Array(qfe[:,:,r])[δ_evfp[:, :, r]])) == log(sum(Array(qfe[:,:,r].*peb[:,:,r])[δ_evfp[:, :, r]]))
 
             # Income
             e_fincome[r=reg], log.(fincome[r]) == log.(sum(Array(peb[:, :, r] .* qes[:, :, r])[δ_evfp[:, :, r]]) .- δ[r] .* pinv[r] .* kb[r])
