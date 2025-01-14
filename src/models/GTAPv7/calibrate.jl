@@ -1,4 +1,4 @@
-function calibrate(; start_data, data, sets=sets,  start_parameters, fixed=fixed, max_iter=100, constr_viol_tol=1e-8)
+function calibrate(; start_data, data, sets=sets, parameters, fixed, max_iter=100, constr_viol_tol=1e-8)
 
     # We do not want to mess with user's fixed dictionary
     fixed = deepcopy(fixed)
@@ -97,7 +97,7 @@ function calibrate(; start_data, data, sets=sets,  start_parameters, fixed=fixed
     fixed["vdpp"][1, 1] = true
 
     @time begin
-        (; data) = GTAPv7.model(sets=sets, data=calibrate_start, parameters=start_parameters, fixed=fixed, max_iter=max_iter, constr_viol_tol=constr_viol_tol)
+        (; data) = GTAPv7.model(sets=sets, data=calibrate_start, parameters=parameters, fixed=fixed, max_iter=max_iter, constr_viol_tol=constr_viol_tol)
     end
 
     calibrated_data = deepcopy(data)
