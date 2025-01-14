@@ -33,6 +33,7 @@ include("./models/GTAPv7/helpers/prepare_initial_calibrated_parameters.jl")
 
 # The main model function
 include("./models/GTAPv7/model.jl")
+include("./models/GTAPv7/calibrate.jl")
 
 # Function that aggregates data on the assumption that the standard GTAP data are provided (based on headers)
 include("./models/GTAPv7/aggregate_data.jl")
